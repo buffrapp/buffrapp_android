@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BuffRApp</string>
+    <string name="action_settings">Configuraciones</string>
+    <string name="action_sign_in">Iniciar sesión</string>
+    <string name="action_sign_in_short">Iniciá sesión</string>
+    <string name="invalid_password">La contraseña debe tener 5 carácteres o más.</string>
+    <string name="invalid_username">No es un nombre de usuario válido.</string>
+    <string name="login_failed">Error al iniciar sesión.</string>
+    <string name="menu_gallery">Galería</string>
+    <string name="menu_home">Inicio</string>
+    <string name="menu_send">Enviar</string>
+    <string name="menu_share">Compartir</string>
+    <string name="menu_slideshow">Presentación</string>
+    <string name="menu_tools">Herrramientas</string>
+    <string name="nav_header_desc">Cabecera de navegación</string>
+    <string name="welcome">¡Hola!\n\nPara continuar, iniciá sesión.</string>
+    <string name="prompt_email">DNI</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="version">Versión %s</string>
+</resources>
