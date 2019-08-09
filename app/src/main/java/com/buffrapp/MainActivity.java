@@ -1,7 +1,9 @@
 package com.buffrapp;
 
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.nav_products);
     }
 
     @Override
@@ -86,17 +89,18 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_products) {
+        } else if (id == R.id.nav_requests) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_history) {
 
-        } else if (id == R.id.nav_tools) {
+        } else if (id == R.id.nav_schedule) {
+
+        } else if (id == R.id.nav_profile) {
 
         } else if (id == R.id.nav_share) {
 
