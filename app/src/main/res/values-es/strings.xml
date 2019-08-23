@@ -13,7 +13,7 @@
     <string name="menu_tools">Herrramientas</string>
     <string name="nav_header_desc">Cabecera de navegación</string>
     <string name="welcome">¡Hola!\n\nPara continuar, iniciá sesión.</string>
-    <string name="prompt_email">DNI</string>
+    <string name="prompt_email">DNI o correo electrónico</string>
     <string name="prompt_password">Contraseña</string>
     <string name="version">Versión %s</string>
     <string name="menu_products">Productos</string>
@@ -25,4 +25,8 @@
     <string name="navigation_drawer_close">Cerrar caja de navegación</string>
     <string name="navigation_drawer_open" translatable="false">Abrir caja de navegación</string>
     <string name="menu_comunicate">Comunicáte</string>
+    <string name="menu_home">Inicio</string>
+    <string name="title_activity_history">Historial</string>
+    <string name="title_activity_requests">Pedidos</string>
+    <string name="request_malformedurl">Hubo un error inesperado al cargar los datos.</string>
 </resources>
