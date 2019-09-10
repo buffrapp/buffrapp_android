@@ -2,13 +2,18 @@
     <string name="app_name">BuffRApp</string>
     <string name="version">Version %s</string>
 
-    <string translatable="false" name="server_proto">https://</string>
+    <string name="server_proto" translatable="false">https://</string>
     <string name="server_ip" translatable="false">192.168.1.113</string>
-    <string translatable="false" name="server_path">/buffrapp_web/api.php</string>
+    <string name="server_path" translatable="false">/buffrapp_web/api.php</string>
     <string name="server_encoding" translatable="false">UTF-8</string>
     <string name="server_request_method" translatable="false">POST</string>
     <string name="server_request_param" translatable="false">request</string>
-    <string translatable="false" name="request_getProducts">getProducts</string>
+    <string name="server_content_param" translatable="false">content</string>
+
+    <string name="request_doUserLogin" translatable="false">doUserLogin</string>
+    <string name="request_getProducts" translatable="false">getProducts</string>
+
+    <string name="key_sessionid" translatable="false">session_id</string>
 
     <!-- Strings related to login -->
     <string name="welcome">"Hi!\n\nTo keep going, log in."</string>
@@ -18,7 +23,10 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="login_failed">"We couldn't find an account matching this combination, please try again."</string>
+    <string name="button_wait">Wait…</string>
+    <string name="login_crash">We were unable to communicate with the server, please try again later.</string>
+    <string name="login_inconsistent">A database problem has been found and your account can\'t be logged in, please contact us.</string>
 
     <!-- String related to MainActivity -->
     <string name="title_activity_main">Products</string>

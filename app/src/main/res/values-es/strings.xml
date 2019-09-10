@@ -6,7 +6,7 @@
     <string name="action_sign_in_short">Iniciá sesión</string>
     <string name="invalid_password">La contraseña debe tener 5 carácteres o más.</string>
     <string name="invalid_username">No es un nombre de usuario válido.</string>
-    <string name="login_failed">Error al iniciar sesión.</string>
+    <string name="login_failed">No pudimos encontrar una cuenta que coincida con esa combinación, por favor intentálo nuevamente.</string>
     <string name="menu_send">Enviar</string>
     <string name="menu_share">Compartir</string>
     <string name="menu_slideshow">Presentación</string>
@@ -29,4 +29,7 @@
     <string name="title_activity_history">Historial</string>
     <string name="title_activity_requests">Pedidos</string>
     <string name="request_malformedurl">Hubo un error inesperado al cargar los datos.</string>
+    <string name="button_wait">Espere…</string>
+    <string name="login_crash">No pudimos comunicarnos con el servidor, por favor intentálo otra vez más tarde.</string>
+    <string name="login_inconsistent">Se encontró un problema en la base de datos y tu cuenta no puede cargarsae, por favor contactános.</string>
 </resources>

@@ -92,30 +92,15 @@
     <Button
         android:id="@+id/login"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/login_button_height"
         android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@color/colorAccent"
         android:enabled="false"
+        android:onClick="loginButtonHandler"
         android:text="@string/action_sign_in"
         android:textColor="@color/white"
         app:layout_constraintLeft_toRightOf="@+id/guideline"
-        app:layout_constraintWidth_percent="0.5"
         app:layout_constraintTop_toBottomOf="@+id/password"
-        app:backgroundTint="@color/colorAccent" />
-
-    <ProgressBar
-        android:id="@+id/loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="64dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/password"
-        app:layout_constraintStart_toStartOf="@+id/password"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3" />
+        app:layout_constraintWidth_percent="0.5" />
 
 </android.support.constraint.ConstraintLayout>
