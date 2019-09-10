@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_products);
+        navigationView.bringToFront();
 
         new networkWorker(this).execute();
     }
