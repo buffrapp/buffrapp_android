@@ -3,8 +3,11 @@
     <string name="version">Version %s</string>
 
     <string translatable="false" name="server_proto">https://</string>
-    <string translatable="false" name="server_ip">192.168.0.31</string>
+    <string name="server_ip" translatable="false">192.168.1.113</string>
     <string translatable="false" name="server_path">/buffrapp_web/api.php</string>
+    <string name="server_encoding" translatable="false">UTF-8</string>
+    <string name="server_request_method" translatable="false">POST</string>
+    <string name="server_request_param" translatable="false">request</string>
     <string translatable="false" name="request_getProducts">getProducts</string>
 
     <!-- Strings related to login -->

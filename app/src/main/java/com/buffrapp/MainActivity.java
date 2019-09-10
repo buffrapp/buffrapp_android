@@ -3,6 +3,7 @@ package com.buffrapp;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.SSLCertificateSocketFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,16 +19,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -38,67 +43,14 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
 
-    private void displayUnhandledException(Exception e) {
-        Toast toast = Toast.makeText(this, R.string.request_malformedurl, Toast.LENGTH_LONG);
-        toast.show();
-
-        e.printStackTrace();
-    }
-
-    private class networkWorker extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            String preURL = getString(R.string.server_proto) + getString(R.string.server_ip) + getString(R.string.server_path);
-            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
-
-            String data = "";
-
-            try {
-                URL url = new URL(preURL);
-
-                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
-
-                // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
-                httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
-                httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
-
-                try {
-
-                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
-                } finally {
-                    httpsURLConnection.disconnect();
-                }
-            } catch (final MalformedURLException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        displayUnhandledException(e);
-                    }
-                });
-            } catch (final IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        displayUnhandledException(e);
-                    }
-                });
-            }
-
-            return null;
-        }
-    }
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        progressBar = findViewById(R.id.progressBar);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -119,7 +71,87 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_products);
 
-        new networkWorker().execute();
+        new networkWorker(this).execute();
+    }
+
+    private static class networkWorker extends AsyncTask<Void, Void, Void> {
+        private WeakReference<MainActivity> mainActivity;
+
+        networkWorker(MainActivity mainActivity) {
+            this.mainActivity = new WeakReference<>(mainActivity);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            MainActivity reference = mainActivity.get();
+
+            if (mainActivity == null) {
+                return null;
+            }
+
+            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_ip) + reference.getString(R.string.server_path);
+            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+
+            try {
+                URL url = new URL(preURL);
+                HttpsURLConnection httpsURLConnection = null;
+
+                try {
+                    // Try to open a connection.
+                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
+
+                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
+                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+                    Uri.Builder builder = new Uri.Builder()
+                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getProducts));
+
+                    String query = builder.build().getEncodedQuery();
+
+                    // Write POST data.
+                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
+                    BufferedWriter bufferedWriter = new BufferedWriter(
+                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
+                    bufferedWriter.write(query);
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+
+                    // Retrieve the response.
+                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+
+                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (httpsURLConnection != null) {
+                        httpsURLConnection.disconnect();
+                    }
+                }
+            } catch (final MalformedURLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            MainActivity reference = mainActivity.get();
+
+            if (mainActivity != null) {
+                ProgressBar progressBar = reference.findViewById(R.id.progressBar);
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+        }
     }
 
     @Override
