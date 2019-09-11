@@ -32,4 +32,6 @@
     <string name="button_wait">Espere…</string>
     <string name="login_crash">No pudimos comunicarnos con el servidor, por favor intentálo otra vez más tarde.</string>
     <string name="login_inconsistent">Se encontró un problema en la base de datos y tu cuenta no puede cargarsae, por favor contactános.</string>
+    <string name="no_products">No hay nada que ver acá, \n¿te gustaría probar actualizando?</string>
+    <string name="products_error">Hubo un problema, \n¿querés probar otra vez?</string>
 </resources>
