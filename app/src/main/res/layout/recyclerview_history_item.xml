@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tvOrderReceived"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/colorGreySemitransparent"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/tvProductName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvOrderReceived"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/tvProductPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvProductName"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvOrderHolder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvProductPrice"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvOrderTaken"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvOrderHolder"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvOrderReady"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvOrderTaken"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvOrderDelivered"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvOrderReady"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvOrderCanceled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvOrderDelivered"
+        android:text="@string/order_cancelled"
+        android:textSize="12sp"
+        android:visibility="invisible" />
+</RelativeLayout>

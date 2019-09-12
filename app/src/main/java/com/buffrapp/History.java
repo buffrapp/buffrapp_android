@@ -1,30 +1,61 @@
 package com.buffrapp;
 
 import android.content.Intent;
+import android.net.SSLCertificateSocketFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.json.JSONArray;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class History extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, HistoryAdapter.ItemClickListener {
 
     private static final String TAG = "History";
+
+    private HistoryAdapter historyAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -43,7 +74,35 @@ public class History extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_history);
+        ;
+        navigationView.bringToFront();
+
+        final RecyclerView recyclerView = findViewById(R.id.rvHistory);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        historyAdapter = new HistoryAdapter(this, null);
+        historyAdapter.setClickListener(this);
+        recyclerView.setAdapter(historyAdapter);
+
+        new NetworkWorker(this).execute();
+
+        swipeRefreshLayout.setRefreshing(true);
+        swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+
+                    @Override
+                    public void onRefresh() {
+                        Log.d(TAG, "onRefresh: refreshing data...");
+                        recyclerView.setVisibility(View.GONE);
+                        new NetworkWorker(History.this).execute();
+                    }
+                });
     }
+
+    @Override
+    public void onItemClick(View view, int position) {
+    } // this method could be implemented later.
 
     @Override
     public void onBackPressed() {
@@ -94,5 +153,150 @@ public class History extends AppCompatActivity
 
         Log.d(TAG, "onNavigationItemSelected: selected ID is " + id);
         return true;
+    }
+
+    private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
+        private static final int NOT_ALLOWED = 2;
+        private WeakReference<History> historyActivity;
+
+        NetworkWorker(History historyActivity) {
+            this.historyActivity = new WeakReference<>(historyActivity);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            final History reference = historyActivity.get();
+
+            if (historyActivity == null) {
+                return null;
+            }
+
+            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_ip) + reference.getString(R.string.server_path);
+            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+
+            try {
+                URL url = new URL(preURL);
+                HttpsURLConnection httpsURLConnection = null;
+
+                try {
+                    // Try to open a connection.
+                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
+                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
+
+                    // Set the cookies.
+                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
+                    Log.d(TAG, "doInBackground: cookie: " + cookie);
+                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
+
+                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
+                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+                    Uri.Builder builder = new Uri.Builder()
+                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getUserHistory));
+
+                    String query = builder.build().getEncodedQuery();
+                    Log.d(TAG, "doInBackground: query: " + query);
+
+                    // Write POST data.
+                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
+                    BufferedWriter bufferedWriter = new BufferedWriter(
+                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
+                    bufferedWriter.write(query);
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+
+                    // Retrieve the response.
+                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+
+                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
+
+                    final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+
+                    if (jsonArray.length() > 0 && !stringBuilder.toString().equals(String.valueOf(NOT_ALLOWED))) {
+                        Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
+
+                        reference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                reference.historyAdapter.setNewData(jsonArray);
+                            }
+                        });
+
+                        reference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
+                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
+                                RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
+                                ImageView icError = reference.findViewById(R.id.icError);
+                                TextView tvError = reference.findViewById(R.id.tvError);
+
+                                icNoProducts.setVisibility(View.GONE);
+                                tvNoProducts.setVisibility(View.GONE);
+                                icError.setVisibility(View.GONE);
+                                tvError.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    } else {
+                        reference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
+                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
+                                RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
+                                ImageView icError = reference.findViewById(R.id.icError);
+                                TextView tvError = reference.findViewById(R.id.tvError);
+
+                                icNoProducts.setVisibility(View.VISIBLE);
+                                tvNoProducts.setVisibility(View.VISIBLE);
+                                icError.setVisibility(View.GONE);
+                                tvError.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ImageView icError = reference.findViewById(R.id.icError);
+                            TextView tvError = reference.findViewById(R.id.tvError);
+
+                            icError.setVisibility(View.VISIBLE);
+                            tvError.setVisibility(View.VISIBLE);
+                        }
+                    });
+                    e.printStackTrace();
+                } finally {
+                    if (httpsURLConnection != null) {
+                        httpsURLConnection.disconnect();
+                    }
+                }
+            } catch (final MalformedURLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            History reference = historyActivity.get();
+
+            if (historyActivity != null) {
+                SwipeRefreshLayout swipeRefreshLayout = reference.findViewById(R.id.swipeRefreshLayout);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        }
     }
 }

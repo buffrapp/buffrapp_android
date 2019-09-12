@@ -34,4 +34,12 @@
     <string name="login_inconsistent">Se encontró un problema en la base de datos y tu cuenta no puede cargarsae, por favor contactános.</string>
     <string name="no_products">No hay nada que ver acá, \n¿te gustaría probar actualizando?</string>
     <string name="products_error">Hubo un problema, \n¿querés probar otra vez?</string>
+    <string name="products_order_confirmation">¿Querés pedir %s?</string>
+    <string name="dialog_no">No</string>
+    <string name="dialog_yes">Sí</string>
+    <string name="order_cancelled">La orden fue cancelada.</string>
+    <string name="order_delivered">Entregado: %s</string>
+    <string name="order_ready">Listo: %s</string>
+    <string name="order_taken">Tomado: %s</string>
+    <string name="order_holder">Tomó: %s</string>
 </resources>

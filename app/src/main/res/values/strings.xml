@@ -9,11 +9,19 @@
     <string name="server_request_method" translatable="false">POST</string>
     <string name="server_request_param" translatable="false">request</string>
     <string name="server_content_param" translatable="false">content</string>
+    <string name="server_cookie_response_key" translatable="false">Set-Cookie</string>
+    <string name="server_cookie_request_key" translatable="false">Cookie</string>
 
     <string name="request_doUserLogin" translatable="false">doUserLogin</string>
     <string name="request_getProducts" translatable="false">getProducts</string>
+    <string name="request_getUserHistory" translatable="false">getUserHistory</string>
 
-    <string name="key_sessionid" translatable="false">session_id</string>
+    <string name="key_session_id" translatable="false">session_id</string>
+
+    <!-- Misc -->
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
+    <string name="product_price" translatable="false">$ %s</string>
 
     <!-- Strings related to login -->
     <string name="welcome">"Hi!\n\nTo keep going, log in."</string>
@@ -36,7 +44,15 @@
     <string name="action_settings">Settings</string>
     <string name="request_malformedurl">There\'s been an unexpected exception while fetching the data.</string>
     <string name="no_products">Nothing here, \nwould you like to try reloading?</string>
-    <string name="products_error">An unexpected exception has occured, \nwould you like to try again?</string>
+    <string name="products_error">There was a problem, \nwould you like to try again?</string>
+    <string name="products_order_confirmation">Do you really want to order %s?</string>
+
+    <!-- History -->
+    <string name="order_holder">Holder: %s</string>
+    <string name="order_taken">Taken: %s</string>
+    <string name="order_ready">Ready: %s</string>
+    <string name="order_delivered">Delivered: %s</string>
+    <string name="order_cancelled">The order was cancelled.</string>
 
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>
