@@ -51,6 +51,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
+                                                <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -61,7 +62,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="backgroundAssetType" value="COLOR" />
-                                      <entry key="foregroundImage" value="C:\Users\Leonel Moyano\Desktop\aniversario\musica\icons (1)\icons\icon.svg" />
+                                      <entry key="backgroundColor" value="fffb2e" />
+                                      <entry key="foregroundImage" value="C:\Users\facum\Downloads\IMG-20190822-WA0000-removebg-preview\IMG-20190822-WA0000-removebg-preview.png" />
                                     </map>
                                   </option>
                                 </PersistentState>
