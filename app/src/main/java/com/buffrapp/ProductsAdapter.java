@@ -8,23 +8,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ViewHolder> {
 
     private static final String TAG = "ProductsAdapter";
 
-    private ArrayList<ArrayList<String>> mData;
+    private JSONArray mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // Put data into the constructor method.
-    ProductsAdapter(Context context, ArrayList<ArrayList<String>> data) {
+    ProductsAdapter(Context context, JSONArray data) {
         mInflater = LayoutInflater.from(context);
         mData = data;
     }
 
-    void setNewData(ArrayList<ArrayList<String>> data) {
+    void setNewData(JSONArray data) {
         Log.d(TAG, "setNewData: " + data.toString());
         mData = data;
         notifyDataSetChanged();
@@ -33,22 +35,38 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ViewHo
     // Inflate layout.
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.recyclerview_item, parent, false);
+        View view = mInflater.inflate(R.layout.recyclerview_product_item, parent, false);
         return new ViewHolder(view);
     }
 
     // Bind TV data for each row.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.productNameTextView.setText(mData.get(position).get(0));
-        holder.productPriceTextView.setText(mData.get(position).get(1));
+        try {
+            JSONObject jsonObject = mData.getJSONObject(position);
+            Log.d(TAG, "onBindViewHolder: jsonObject: " + jsonObject.toString());
+            holder.productNameTextView.setText(jsonObject.getString("Nombre"));
+            holder.productPriceTextView.setText(String.format(holder.itemView.getContext().getString(R.string.product_price), jsonObject.getString("Precio")));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public JSONObject getProduct(int position) {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = mData.getJSONObject(position);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
     }
 
     @Override
     public int getItemCount() {
         int size = 0;
         if (mData != null) {
-            size = mData.size();
+            size = mData.length();
         }
 
         return size;

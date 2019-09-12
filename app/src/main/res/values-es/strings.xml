@@ -42,4 +42,5 @@
     <string name="order_ready">Listo: %s</string>
     <string name="order_taken">Tomado: %s</string>
     <string name="order_holder">Tomó: %s</string>
+    <string name="product_unknown">Producto desconocido</string>
 </resources>

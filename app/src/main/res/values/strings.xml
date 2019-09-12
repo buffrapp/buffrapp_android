@@ -15,6 +15,7 @@
     <string name="request_doUserLogin" translatable="false">doUserLogin</string>
     <string name="request_getProducts" translatable="false">getProducts</string>
     <string name="request_getUserHistory" translatable="false">getUserHistory</string>
+    <string name="request_makeOrder" translatable="false">makeOrder</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
 
@@ -46,6 +47,7 @@
     <string name="no_products">Nothing here, \nwould you like to try reloading?</string>
     <string name="products_error">There was a problem, \nwould you like to try again?</string>
     <string name="products_order_confirmation">Do you really want to order %s?</string>
+    <string name="product_unknown">Unknown product</string>
 
     <!-- History -->
     <string name="order_holder">Holder: %s</string>

@@ -1,11 +1,13 @@
 package com.buffrapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.SSLCertificateSocketFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,10 +27,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -51,6 +54,24 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 
     private ProductsAdapter productsAdapter;
+
+    private int productId = -1;
+    private DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    if (productId > -1) {
+                        OrderRequestNetworkWorker orderRequestNetworkWorker = new OrderRequestNetworkWorker(MainActivity.this);
+                        orderRequestNetworkWorker.setProductId(productId);
+                        orderRequestNetworkWorker.execute();
+                    }
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setCheckedItem(R.id.nav_products);
         navigationView.bringToFront();
 
-        final RecyclerView recyclerView = findViewById(R.id.rvProducts);
+        final RecyclerView recyclerView = findViewById(R.id.rvHistory);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         productsAdapter = new ProductsAdapter(this, null);
@@ -105,7 +126,20 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this, "You clicked row number " + position, Toast.LENGTH_SHORT).show();
+        JSONObject product = productsAdapter.getProduct(position);
+
+        String productName = getString(R.string.product_unknown);
+        try {
+            productName = product.getString("Nombre");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
+        Log.d(TAG, "onNavigationItemSelected: selected ID is " + id);
+        return true;
     }
 
     @Override
@@ -237,51 +271,18 @@ public class MainActivity extends AppCompatActivity
 
                     Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
 
-                    JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-
-                    final ArrayList<ArrayList<String>> products = new ArrayList<>();
+                    final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
 
                     if (jsonArray.length() > 0) {
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                            int id = jsonObject.getInt("ID_Producto");
-                            String name = jsonObject.getString("Nombre");
-                            double price = jsonObject.getDouble("Precio");
-                            int available = jsonObject.getInt("Estado");
-
-                            ArrayList<String> currentProduct = new ArrayList<>();
-
-                            if (available == 1) {
-                                currentProduct.add(name);
-                                currentProduct.add(String.valueOf(price));
-
-                                products.add(currentProduct);
-                            }
-
-                            Log.d(TAG, "doInBackground: =========================");
-                            Log.d(TAG, "doInBackground: " + id);
-                            Log.d(TAG, "doInBackground: " + name);
-                            Log.d(TAG, "doInBackground: " + price);
-                            Log.d(TAG, "doInBackground: " + available);
-                            Log.d(TAG, "doInBackground: =========================");
-                        }
-
-                        Log.d(TAG, "doInBackground: products: " + products.toString());
-
+                        Log.d(TAG, "doInBackground: products: " + jsonArray.toString());
                         reference.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                reference.productsAdapter.setNewData(products);
-                            }
-                        });
+                                reference.productsAdapter.setNewData(jsonArray);
 
-                        reference.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
+                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
+                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
+                                RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
                                 ImageView icError = reference.findViewById(R.id.icError);
                                 TextView tvError = reference.findViewById(R.id.tvError);
 
@@ -296,9 +297,9 @@ public class MainActivity extends AppCompatActivity
                         reference.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
+                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
+                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
+                                RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
                                 ImageView icError = reference.findViewById(R.id.icError);
                                 TextView tvError = reference.findViewById(R.id.tvError);
 
