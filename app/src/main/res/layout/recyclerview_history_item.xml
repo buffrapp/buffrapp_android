@@ -63,5 +63,6 @@
         android:layout_below="@+id/tvOrderDelivered"
         android:text="@string/order_cancelled"
         android:textSize="12sp"
+        android:textColor="@color/colorRed"
         android:visibility="invisible" />
 </RelativeLayout>

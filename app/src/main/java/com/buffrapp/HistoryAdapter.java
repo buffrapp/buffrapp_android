@@ -54,8 +54,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
                 holder.orderReadyTextView.setText(String.format(holder.itemView.getContext().getString(R.string.order_ready), jsonObject.getString("FH_Listo")));
                 holder.orderDeliveredTextView.setText(String.format(holder.itemView.getContext().getString(R.string.order_delivered), jsonObject.getString("FH_Entregado")));
             } else {
-                holder.orderTakenTextView.setVisibility(View.INVISIBLE);
-                holder.orderReadyTextView.setVisibility(View.INVISIBLE);
+                holder.orderTakenTextView.setVisibility(View.GONE);
+                holder.orderReadyTextView.setVisibility(View.GONE);
+                holder.orderDeliveredTextView.setVisibility(View.GONE);
                 holder.orderCancelledTextView.setVisibility(View.VISIBLE);
             }
         } catch (JSONException e) {
