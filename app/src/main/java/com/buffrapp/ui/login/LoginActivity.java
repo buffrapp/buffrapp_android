@@ -241,7 +241,7 @@ public class LoginActivity extends AppCompatActivity {
                     bufferedWriter.close();
 
                     // Retrieve the response.
-                    final String session_id = httpsURLConnection.getHeaderField("Set-Cookie");
+                    final String session_id = httpsURLConnection.getHeaderField(reference.getString(R.string.server_cookie_response_key));
                     Log.d(TAG, "doInBackground: " + session_id);
                     InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -266,7 +266,7 @@ public class LoginActivity extends AppCompatActivity {
                                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(reference);
                                     SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
 
-                                    sharedPreferencesEditor.putString(reference.getString(R.string.key_sessionid), session_id);
+                                    sharedPreferencesEditor.putString(reference.getString(R.string.key_session_id), session_id);
                                     sharedPreferencesEditor.apply();
                                 }
                             });
