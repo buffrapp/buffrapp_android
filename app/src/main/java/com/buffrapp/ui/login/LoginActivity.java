@@ -303,23 +303,25 @@ public class LoginActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            reference.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Button button = reference.findViewById(R.id.login);
-                    button.setText(reference.getString(R.string.action_sign_in));
-                    button.setEnabled(true);
-                    button.setBackgroundColor(reference.getResources().getColor(R.color.colorAccent));
-                }
-            });
-
-            if (response != LOGIN_PASS && response < LOGIN_BAD_CREDENTIALS) {
+            if (response != LOGIN_PASS) {
                 reference.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        reference.showLoginFailed(R.string.login_crash);
+                        Button button = reference.findViewById(R.id.login);
+                        button.setText(reference.getString(R.string.action_sign_in));
+                        button.setEnabled(true);
+                        button.setBackgroundColor(reference.getResources().getColor(R.color.colorAccent));
                     }
                 });
+
+                if (response < LOGIN_BAD_CREDENTIALS) {
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            reference.showLoginFailed(R.string.login_crash);
+                        }
+                    });
+                }
             }
             return null;
         }
