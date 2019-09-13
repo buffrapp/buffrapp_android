@@ -3,12 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground"
     android:padding="10dp">
 
     <TextView
         android:id="@+id/tvProductName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="20sp" />
 
     <TextView
@@ -16,6 +19,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvProductName"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="15sp" />
 
 </RelativeLayout>

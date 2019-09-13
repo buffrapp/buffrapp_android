@@ -9,6 +9,7 @@
     <!-- Custom dimensions -->
     <dimen name="login_button_height">40sp</dimen>
     <dimen name="activity_vertical_margin_brand">80dp</dimen>
-    <dimen name="activity_vertical_padding_top">60dp</dimen>
+    <dimen name="activity_vertical_padding_top">56dp</dimen>
     <dimen name="activity_vertical_margin_info">32dp</dimen>
+    <dimen name="rv_item_padding">8dp</dimen>
 </resources>

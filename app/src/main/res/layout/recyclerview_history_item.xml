@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground"
     android:padding="10dp">
 
     <TextView
@@ -12,6 +13,8 @@
         android:gravity="end"
         android:textAlignment="viewEnd"
         android:textColor="@color/colorGreySemitransparent"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="12sp" />
 
     <TextView
@@ -19,6 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvOrderReceived"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="20sp" />
 
     <TextView
@@ -26,6 +31,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvProductName"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="15sp" />
 
     <TextView
@@ -33,6 +40,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvProductPrice"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="15sp" />
 
     <TextView
@@ -40,6 +49,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvOrderHolder"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="15sp" />
 
     <TextView
@@ -47,6 +58,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvOrderTaken"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="15sp" />
 
     <TextView
@@ -54,6 +67,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvOrderReady"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="15sp" />
 
     <TextView
@@ -62,6 +77,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvOrderDelivered"
         android:text="@string/order_cancelled"
+        android:paddingLeft="@dimen/rv_item_padding"
+        android:paddingRight="@dimen/rv_item_padding"
         android:textSize="12sp"
         android:textColor="@color/colorRed"
         android:visibility="invisible" />
