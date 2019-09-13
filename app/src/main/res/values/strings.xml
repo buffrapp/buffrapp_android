@@ -69,6 +69,8 @@
     <string name="menu_schedule">Schedule</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_comunicate">Contact us</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_logout">Logout</string>
     <string name="title_activity_requests">Requests</string>
     <string name="title_activity_history">History</string>
 

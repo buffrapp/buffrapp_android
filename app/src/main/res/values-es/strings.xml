@@ -47,4 +47,6 @@
     <string name="order_success">Tu orden se puso en cola.</string>
     <string name="order_already_ordered">Ya pediste esto, podés ver cómo va en la pestaña de Pedidos.</string>
     <string name="title_activity_products">Productos</string>
+    <string name="menu_logout">Cerrar sesión</string>
+    <string name="menu_account">Cuenta</string>
 </resources>

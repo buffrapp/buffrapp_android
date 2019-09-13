@@ -12,23 +12,43 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
 
     private static final String TAG = "HistoryAdapter";
 
-    private JSONArray mData;
+    private ArrayList<JSONObject> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // Put data into the constructor method.
-    HistoryAdapter(Context context, JSONArray data) {
+    HistoryAdapter(Context context, ArrayList<JSONObject> data) {
         mInflater = LayoutInflater.from(context);
         mData = data;
     }
 
     void setNewData(JSONArray data) {
         Log.d(TAG, "setNewData: " + data.toString());
-        mData = data;
+        ArrayList<JSONObject> jsonObjects = new ArrayList<>();
+        for (int i = 0; i < data.length(); i++) {
+            try {
+                JSONObject jsonObject = data.getJSONObject(i);
+                if (jsonObject.isNull("DNI_Cancelado")) {
+                    if (!(jsonObject.isNull("FH_Tomado") || jsonObject.isNull("FH_Listo") || jsonObject.isNull("FH_Entregado"))) {
+                        jsonObjects.add(jsonObject);
+                    } else {
+                        Log.d(TAG, "onBindViewHolder: pending order found, skipping history item.");
+                    }
+                } else {
+                    jsonObjects.add(jsonObject);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        mData = jsonObjects;
         notifyDataSetChanged();
     }
 
@@ -43,8 +63,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         try {
-            JSONObject jsonObject = mData.getJSONObject(position);
+            JSONObject jsonObject = mData.get(position);
             Log.d(TAG, "onBindViewHolder: jsonObject: " + jsonObject.toString());
+
             holder.productNameTextView.setText(jsonObject.getString("Producto_Nombre"));
             holder.productPriceTextView.setText(String.format(holder.itemView.getContext().getString(R.string.product_price), jsonObject.getString("Producto_Precio")));
             holder.orderHolderTextView.setText(String.format(holder.itemView.getContext().getString(R.string.order_holder), jsonObject.getString("Nombre_Administrador")));
@@ -54,6 +75,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
                 holder.orderReadyTextView.setText(String.format(holder.itemView.getContext().getString(R.string.order_ready), jsonObject.getString("FH_Listo")));
                 holder.orderDeliveredTextView.setText(String.format(holder.itemView.getContext().getString(R.string.order_delivered), jsonObject.getString("FH_Entregado")));
             } else {
+                Log.d(TAG, "onBindViewHolder: the order was cancelled.");
                 holder.orderTakenTextView.setVisibility(View.GONE);
                 holder.orderReadyTextView.setVisibility(View.GONE);
                 holder.orderDeliveredTextView.setVisibility(View.GONE);
@@ -68,7 +90,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     public int getItemCount() {
         int size = 0;
         if (mData != null) {
-            size = mData.length();
+            size = mData.size();
         }
 
         return size;

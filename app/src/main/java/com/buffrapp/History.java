@@ -1,6 +1,7 @@
 package com.buffrapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.SSLCertificateSocketFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -24,6 +25,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.buffrapp.ui.login.LoginActivity;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONArray;
@@ -146,6 +149,13 @@ public class History extends AppCompatActivity
 
         } else if (id == R.id.nav_send) {
 
+        } else if (id == R.id.nav_logout) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(getString(R.string.key_session_id));
+
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

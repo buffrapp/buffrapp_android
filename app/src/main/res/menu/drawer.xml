@@ -39,4 +39,12 @@
         </menu>
     </item>
 
+    <item android:title="@string/menu_account">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_menu_logout"
+                android:title="@string/menu_logout" />
+        </menu>
+    </item>
 </menu>
