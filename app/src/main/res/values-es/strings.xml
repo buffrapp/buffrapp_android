@@ -43,4 +43,7 @@
     <string name="order_taken">Tomado: %s</string>
     <string name="order_holder">Tomó: %s</string>
     <string name="product_unknown">Producto desconocido</string>
+    <string name="order_error">Hubo un problema, por favor intentálo otra vez.</string>
+    <string name="order_success">Tu orden se puso en cola.</string>
+    <string name="order_already_ordered">Ya pediste esto, podés ver cómo va en la pestaña de Pedidos.</string>
 </resources>

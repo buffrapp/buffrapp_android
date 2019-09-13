@@ -48,6 +48,9 @@
     <string name="products_error">There was a problem, \nwould you like to try again?</string>
     <string name="products_order_confirmation">Do you really want to order %s?</string>
     <string name="product_unknown">Unknown product</string>
+    <string name="order_error">An error has been found, please try again.</string>
+    <string name="order_success">Your order has now been queued.</string>
+    <string name="order_already_ordered">You\'ve already ordered this item, check its status at the Requests tab.</string>
 
     <!-- History -->
     <string name="order_holder">Holder: %s</string>

@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONArray;
@@ -44,7 +45,6 @@ import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -53,12 +53,18 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
 
+    private static final Character SYMBOL_AMPERSAND = '&';
+    private static final Character SYMBOL_EQUALS = '=';
+    private static final Character SYMBOL_BRACKET_OPEN = '[';
+    private static final Character SYMBOL_BRACKET_CLOSED = ']';
+
     private ProductsAdapter productsAdapter;
 
     private int productId = -1;
     private DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
+            Log.d(TAG, "onClick: productId: " + productId);
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
                     if (productId > -1) {
@@ -131,15 +137,17 @@ public class MainActivity extends AppCompatActivity
         String productName = getString(R.string.product_unknown);
         try {
             productName = product.getString("Nombre");
+            productId = product.getInt("ID_Producto");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
 
-        Log.d(TAG, "onNavigationItemSelected: selected ID is " + id);
-        return true;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(String.format(getString(R.string.products_order_confirmation), productName))
+                .setPositiveButton(getString(R.string.dialog_yes), dialogClickListener)
+                .setNegativeButton(getString(R.string.dialog_no), dialogClickListener)
+                .show();
     }
 
     @Override
@@ -344,6 +352,125 @@ public class MainActivity extends AppCompatActivity
                 SwipeRefreshLayout swipeRefreshLayout = reference.findViewById(R.id.swipeRefreshLayout);
                 swipeRefreshLayout.setRefreshing(false);
             }
+        }
+    }
+
+    private static class OrderRequestNetworkWorker extends AsyncTask<Void, Void, Void> {
+        private static final String ORDER_PASS = "0";
+        private static final String ORDER_ERROR = "1";
+        private static final String ORDER_ALREADY_ORDERED = "3";
+        private WeakReference<MainActivity> mainActivity;
+        private int productId = -1;
+
+        OrderRequestNetworkWorker(MainActivity mainActivity) {
+            this.mainActivity = new WeakReference<>(mainActivity);
+        }
+
+        private String getEncodedProductId(String key, int productId) {
+            return SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + productId;
+        }
+
+        public void setProductId(int id) {
+            productId = id;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            final MainActivity reference = mainActivity.get();
+
+            if (mainActivity == null) {
+                return null;
+            }
+
+            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_ip) + reference.getString(R.string.server_path);
+            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+
+            try {
+                URL url = new URL(preURL);
+                HttpsURLConnection httpsURLConnection = null;
+
+                try {
+                    // Try to open a connection.
+                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
+                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
+
+                    // Set the cookies.
+                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
+                    Log.d(TAG, "doInBackground: cookie: " + cookie);
+                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
+
+                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
+                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+                    Uri.Builder builder = new Uri.Builder()
+                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_makeOrder));
+
+                    String query = builder.build().getEncodedQuery() + getEncodedProductId(reference.getString(R.string.server_content_param), productId);
+                    Log.d(TAG, "doInBackground: query: " + query);
+
+                    // Write POST data.
+                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
+                    BufferedWriter bufferedWriter = new BufferedWriter(
+                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
+                    bufferedWriter.write(query);
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+
+                    // Retrieve the response.
+                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+
+                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
+
+                    switch (stringBuilder.toString()) {
+                        case ORDER_PASS:
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(reference, reference.getString(R.string.order_success), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            break;
+                        case ORDER_ALREADY_ORDERED:
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(reference, reference.getString(R.string.order_already_ordered), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            break;
+                        case ORDER_ERROR:
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(reference, reference.getString(R.string.products_error), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (httpsURLConnection != null) {
+                        httpsURLConnection.disconnect();
+                    }
+                }
+            } catch (final MalformedURLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
         }
     }
 }
