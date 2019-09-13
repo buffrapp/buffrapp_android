@@ -3,7 +3,7 @@
     <string name="version">Version %s</string>
 
     <string name="server_proto" translatable="false">https://</string>
-    <string name="server_ip" translatable="false">192.168.1.113</string>
+    <string name="server_ip" translatable="false">192.168.0.16</string>
     <string name="server_path" translatable="false">/buffrapp_web/api.php</string>
     <string name="server_encoding" translatable="false">UTF-8</string>
     <string name="server_request_method" translatable="false">POST</string>
@@ -38,7 +38,7 @@
     <string name="login_inconsistent">A database problem has been found and your account can\'t be logged in, please contact us.</string>
 
     <!-- String related to MainActivity -->
-    <string name="title_activity_main">Products</string>
+    <string name="title_activity_products">Products</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
