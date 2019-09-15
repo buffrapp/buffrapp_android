@@ -87,8 +87,6 @@ public class History extends AppCompatActivity
         historyAdapter.setClickListener(this);
         recyclerView.setAdapter(historyAdapter);
 
-        new NetworkWorker(this).execute();
-
         swipeRefreshLayout.setRefreshing(true);
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
         swipeRefreshLayout.setOnRefreshListener(
@@ -101,6 +99,8 @@ public class History extends AppCompatActivity
                         new NetworkWorker(History.this).execute();
                     }
                 });
+
+        new NetworkWorker(this).execute();
     }
 
     @Override
@@ -153,6 +153,7 @@ public class History extends AppCompatActivity
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(getString(R.string.key_session_id));
+            editor.apply();
 
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);

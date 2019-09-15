@@ -21,7 +21,6 @@
     <string name="menu_history">Historial</string>
     <string name="menu_schedule">Horarios</string>
     <string name="menu_profile">Perfil</string>
-    <string name="title_activity_main">Productos</string>
     <string name="navigation_drawer_close">Cerrar caja de navegación</string>
     <string name="navigation_drawer_open" translatable="false">Abrir caja de navegación</string>
     <string name="menu_comunicate">Comunicáte</string>
@@ -49,4 +48,10 @@
     <string name="title_activity_products">Productos</string>
     <string name="menu_logout">Cerrar sesión</string>
     <string name="menu_account">Cuenta</string>
+    <string name="requests_order_received">Tu orden fue recibida y está esperando confirmación, \nte vamos a avisar cuando haya algún movimiento. \n\nSi querés, podés cerrar o minimizar la aplicación.</string>
+    <string name="requests_order_taken">Tu orden fue tomada y está en progreso. \n\nPronto, vas a recibir una notificación para avisarte cuando la orden esté completa.</string>
+    <string name="requests_order_cancelled">Lo sentimos, pero tu orden fue cancelada, \npor favor intentálo otra vez más tarde.</string>
+    <string name="requests_order_delivered">Tu orden fue entregada, \nahora podés verla en el historial.</string>
+    <string name="requests_order_ready">Tu orden está lista, ahora podés completar la entrega. \n\nLo antes posible, visitá el buffet.</string>
+    <string name="requests_orders_empty">Nada por acá, ¡ordená algo!</string>
 </resources>

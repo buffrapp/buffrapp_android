@@ -3,7 +3,7 @@
     <string name="version">Version %s</string>
 
     <string name="server_proto" translatable="false">https://</string>
-    <string name="server_ip" translatable="false">192.168.0.16</string>
+    <string name="server_ip" translatable="false">192.168.1.113</string>
     <string name="server_path" translatable="false">/buffrapp_web/api.php</string>
     <string name="server_encoding" translatable="false">UTF-8</string>
     <string name="server_request_method" translatable="false">POST</string>
@@ -16,8 +16,10 @@
     <string name="request_getProducts" translatable="false">getProducts</string>
     <string name="request_getUserHistory" translatable="false">getUserHistory</string>
     <string name="request_makeOrder" translatable="false">makeOrder</string>
+    <string name="request_getUserOrders" translatable="false">getUserOrders</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
+    <string name="key_last_order" translatable="false">last_order</string>
 
     <!-- Misc -->
     <string name="dialog_yes">Yes</string>
@@ -58,6 +60,14 @@
     <string name="order_ready">Ready: %s</string>
     <string name="order_delivered">Delivered: %s</string>
     <string name="order_cancelled">The order was cancelled.</string>
+
+    <!-- Requests -->
+    <string name="requests_order_received">Your order has been received and awaits confirmation, \nyou\'ll be notified once there\'s any movement. \nIf you want, you can now close or minimize the application</string>
+    <string name="requests_order_taken">Your order has been taking and it\'s now in progress. \n\nSoon, you\'ll be notified once your order is done to complete the delivery.</string>
+    <string name="requests_order_ready">Your order is ready, you can now complete the delivery.\n\nAs soon as possible, visit the buffet </string>
+    <string name="requests_order_delivered">Your order has been delivered, it\'ll now show up on the history.</string>
+    <string name="requests_order_cancelled">We\'re sorry, but your order has been cancelled, \nplease try again later.</string>
+    <string name="requests_orders_empty">Nothing here, go ahead, order something!</string>
 
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>

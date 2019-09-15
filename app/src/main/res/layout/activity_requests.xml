@@ -13,6 +13,113 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/activity_vertical_padding_top">
+
+        <RelativeLayout
+            android:id="@+id/requests_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:paddingTop="@dimen/activity_vertical_padding_top">
+
+            <ImageView
+                android:id="@+id/ic_requests"
+                android:layout_width="match_parent"
+                android:layout_height="200sp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:contentDescription="@string/products_error"
+                android:src="@drawable/ic_layout_requests"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/requests_order_product_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ic_requests"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:textAlignment="center"
+                android:textSize="30sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/requests_order_status"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/requests_order_progress"
+                android:layout_below="@id/requests_order_product_name"
+                android:gravity="center_vertical"
+                android:text="@string/requests_order_received"
+                android:textAlignment="center"
+                android:textSize="15sp"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/requests_order_progress"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="96sp"
+                android:max="100"
+                android:paddingLeft="@dimen/progressbar_padding"
+                android:paddingRight="@dimen/progressbar_padding"
+                android:progress="0"
+                android:progressTint="@color/colorRed"
+                android:progressTintMode="src_in"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ic_error"
+                android:layout_width="match_parent"
+                android:layout_height="200sp"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/products_error"
+                android:src="@drawable/ic_layout_error"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ic_error"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="@dimen/activity_vertical_margin_info"
+                android:text="@string/products_error"
+                android:textAlignment="center"
+                android:textColor="@color/colorGreySemitransparent"
+                android:textSize="20sp"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ic_empty"
+                android:layout_width="match_parent"
+                android:layout_height="200sp"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/products_error"
+                android:src="@drawable/ic_layout_requests_empty"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ic_empty"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="@dimen/activity_vertical_margin_info"
+                android:text="@string/requests_orders_empty"
+                android:textAlignment="center"
+                android:textColor="@color/colorGreySemitransparent"
+                android:textSize="20sp"
+                android:visibility="gone" />
+        </RelativeLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"

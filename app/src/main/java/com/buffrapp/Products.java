@@ -221,6 +221,7 @@ public class Products extends AppCompatActivity
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(getString(R.string.key_session_id));
+            editor.apply();
 
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);

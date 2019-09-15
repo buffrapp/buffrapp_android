@@ -5,8 +5,11 @@
     <color name="colorAccent">#4CAF50</color>
     <color name="colorAccentDark">#3E8D41</color>
     <color name="colorGreySemitransparent">#66858585</color>
+    <color name="colorGreyDark">#666F6F6F</color>
     <color name="colorLogo">#FFFB2E</color>
     <color name="colorRed">#D60000</color>
+    <color name="colorOngoing">#FFC107</color>
+    <color name="colorDone">#34E23D</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="black_semitransparent">#66000000</color>
