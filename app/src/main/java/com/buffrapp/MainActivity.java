@@ -3,8 +3,9 @@ package com.buffrapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.buffrapp.ui.login.LoginActivity;
 
