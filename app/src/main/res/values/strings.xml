@@ -2,6 +2,10 @@
     <string name="app_name">BuffRApp</string>
     <string name="version">Version %s</string>
 
+    <!-- Notifications -->
+    <string name="channel_name">Order status notifications</string>
+    <string name="channel_description">Push notifications for BuffRApp.</string>
+
     <string name="server_proto" translatable="false">https://</string>
     <string name="server_ip" translatable="false">192.168.1.113</string>
     <string name="server_path" translatable="false">/buffrapp_web/api.php</string>
@@ -62,10 +66,12 @@
     <string name="order_cancelled">The order was cancelled.</string>
 
     <!-- Requests -->
-    <string name="requests_order_received">Your order has been received and awaits confirmation, \nyou\'ll be notified once there\'s any movement. \nIf you want, you can now close or minimize the application</string>
+    <string name="requests_order_received">Your order has been received and awaits confirmation, \nyou\'ll be notified once there\'s any movement. \n\nIf you want, you can now close or minimize the application</string>
+    <string name="requests_order_received_short">Your order has been received and awaits confirmation, \nyou\'ll be notified once there\'s any movement.</string>
     <string name="requests_order_taken">Your order has been taking and it\'s now in progress. \n\nSoon, you\'ll be notified once your order is done to complete the delivery.</string>
     <string name="requests_order_ready">Your order is ready, you can now complete the delivery.\n\nAs soon as possible, visit the buffet </string>
-    <string name="requests_order_delivered">Your order has been delivered, it\'ll now show up on the history.</string>
+    <string name="requests_order_delivered">Your order has been delivered, \nit\'ll now show up on the history.</string>
+    <string name="requests_order_delivered_short">Your order has been delivered, it\'ll now show up on the history.</string>
     <string name="requests_order_cancelled">We\'re sorry, but your order has been cancelled, \nplease try again later.</string>
     <string name="requests_orders_empty">Nothing here, go ahead, order something!</string>
 

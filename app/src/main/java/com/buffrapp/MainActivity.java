@@ -1,15 +1,12 @@
 package com.buffrapp;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.buffrapp.ui.login.LoginActivity;
-
-import java.util.prefs.PreferenceChangeEvent;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +24,10 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         } else {
+            Intent orderStatusLooperIntent = new Intent(this, OrderStatusLooper.class);
+            stopService(orderStatusLooperIntent);
+            startService(orderStatusLooperIntent);
+
             Log.d(TAG, "onCreate: session ID found, it was \"" + session_id + "\", loading Products...");
             Intent intent = new Intent(this, Products.class);
             startActivity(intent);

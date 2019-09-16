@@ -58,11 +58,18 @@ public class Requests extends AppCompatActivity
     private static final String TAG = "Requests";
 
     private static boolean shouldHoldDeliveryView;
+    private static boolean shouldRunBackgroundWorkerOnStop;
+
+    private static Timer timer;
+    private static NetworkWorker networkWorker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
+
+        Intent intent = new Intent(this, OrderStatusLooper.class);
+        stopService(intent);
 
         final SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
@@ -96,6 +103,8 @@ public class Requests extends AppCompatActivity
 
         shouldHoldDeliveryView = false;
 
+        networkWorker = new Requests.NetworkWorker(Requests.this);
+
         swipeRefreshLayout.setRefreshing(true);
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
         swipeRefreshLayout.setOnRefreshListener(
@@ -127,13 +136,14 @@ public class Requests extends AppCompatActivity
                         emptyImageView.setVisibility(View.GONE);
                         emptyTextView.setVisibility(View.GONE);
 
-                        new Requests.NetworkWorker(Requests.this).execute();
+                        networkWorker = new Requests.NetworkWorker(Requests.this);
+                        networkWorker.execute();
                     }
                 });
 
         new Requests.NetworkWorker(Requests.this).execute();
 
-        Timer timer = new Timer();
+        timer = new Timer();
         TimerTask updatingTask = new TimerTask() {
             public void run() {
                 runOnUiThread(new Runnable() {
@@ -146,6 +156,21 @@ public class Requests extends AppCompatActivity
             }
         };
         timer.schedule(updatingTask, 0, getResources().getInteger(R.integer.update_interval));
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        timer.cancel();
+        timer.purge();
+
+        networkWorker.cancel(true);
+
+        if (shouldRunBackgroundWorkerOnStop) {
+            Intent intent = new Intent(this, OrderStatusLooper.class);
+            startService(intent);
+        }
+
+        super.onUserLeaveHint();
     }
 
     @Override
@@ -455,6 +480,7 @@ public class Requests extends AppCompatActivity
                                     showNoOrders();
                                 } else {
                                     Log.d(TAG, "doInBackground: last_id doesn\'t match remote, populating layout...");
+
                                     reference.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -522,6 +548,7 @@ public class Requests extends AppCompatActivity
                                         });
                                     }
 
+                                    shouldRunBackgroundWorkerOnStop = true;
                                     showDataFields();
                                 }
                             } else {
