@@ -446,11 +446,11 @@ public class Products extends AppCompatActivity
                                 @Override
                                 public void run() {
                                     Toast.makeText(reference, reference.getString(R.string.order_success), Toast.LENGTH_LONG).show();
+
+                                    Intent intent = new Intent(reference, OrderStatusLooper.class);
+                                    reference.startService(intent);
                                 }
                             });
-
-                            Intent intent = new Intent(reference, OrderStatusLooper.class);
-                            reference.startService(intent);
                             break;
                         case ORDER_ALREADY_ORDERED:
                             reference.runOnUiThread(new Runnable() {
