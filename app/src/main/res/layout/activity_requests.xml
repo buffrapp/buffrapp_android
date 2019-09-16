@@ -18,6 +18,11 @@
         android:layout_height="match_parent"
         android:paddingTop="@dimen/activity_vertical_padding_top">
 
+        <nl.dionsegijn.konfetti.KonfettiView
+            android:id="@+id/confetti_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"

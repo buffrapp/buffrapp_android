@@ -24,6 +24,7 @@
 
     <string name="key_session_id" translatable="false">session_id</string>
     <string name="key_last_order" translatable="false">last_order</string>
+    <string name="key_first_delivery" translatable="false">first_delivery</string>
 
     <!-- Misc -->
     <string name="dialog_yes">Yes</string>
@@ -71,6 +72,7 @@
     <string name="requests_order_taken">Your order has been taking and it\'s now in progress. \n\nSoon, you\'ll be notified once your order is done to complete the delivery.</string>
     <string name="requests_order_ready">Your order is ready, you can now complete the delivery.\n\nAs soon as possible, visit the buffet </string>
     <string name="requests_order_delivered">Your order has been delivered, \nit\'ll now show up on the history.</string>
+    <string name="requests_order_delivered_first">Congratulations! \nThis is your first order and it\'s been delivered. \n\nCheck it out on the history.</string>
     <string name="requests_order_delivered_short">Your order has been delivered, it\'ll now show up on the history.</string>
     <string name="requests_order_cancelled">We\'re sorry, but your order has been cancelled, \nplease try again later.</string>
     <string name="requests_orders_empty">Nothing here, go ahead, order something!</string>

@@ -2,6 +2,7 @@ package com.buffrapp;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.SSLCertificateSocketFactory;
 import android.net.Uri;
@@ -53,6 +54,10 @@ import java.util.TimerTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import nl.dionsegijn.konfetti.KonfettiView;
+import nl.dionsegijn.konfetti.models.Shape;
+import nl.dionsegijn.konfetti.models.Size;
+
 public class Requests extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -60,6 +65,8 @@ public class Requests extends AppCompatActivity
 
     private static boolean shouldHoldDeliveryView;
     private static boolean shouldRunBackgroundWorkerOnStop;
+    private boolean firstDelivery;
+    private boolean shouldDisplayConfetti;
 
     private static Timer timer;
     private static NetworkWorker networkWorker;
@@ -104,7 +111,7 @@ public class Requests extends AppCompatActivity
 
         shouldHoldDeliveryView = false;
 
-        networkWorker = new Requests.NetworkWorker(Requests.this);
+        networkWorker = new NetworkWorker(Requests.this);
 
         swipeRefreshLayout.setRefreshing(true);
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
@@ -137,12 +144,12 @@ public class Requests extends AppCompatActivity
                         emptyImageView.setVisibility(View.GONE);
                         emptyTextView.setVisibility(View.GONE);
 
-                        networkWorker = new Requests.NetworkWorker(Requests.this);
+                        networkWorker = new NetworkWorker(Requests.this);
                         networkWorker.execute();
                     }
                 });
 
-        new Requests.NetworkWorker(Requests.this).execute();
+        new NetworkWorker(Requests.this).execute();
 
         timer = new Timer();
         TimerTask updatingTask = new TimerTask() {
@@ -151,12 +158,16 @@ public class Requests extends AppCompatActivity
                     @Override
                     public void run() {
                         swipeRefreshLayout.setRefreshing(true);
-                        new Requests.NetworkWorker(Requests.this).execute();
+                        new NetworkWorker(Requests.this).execute();
                     }
                 });
             }
         };
         timer.schedule(updatingTask, 0, getResources().getInteger(R.integer.update_interval));
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        firstDelivery = sharedPreferences.getBoolean(getString(R.string.key_first_delivery), true);
+        shouldDisplayConfetti = true;
     }
 
     @Override
@@ -472,7 +483,7 @@ public class Requests extends AppCompatActivity
 
                                 final JSONObject order = jsonArray.getJSONObject(0);
 
-                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(reference);
+                                final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(reference);
                                 int last_id = sharedPreferences.getInt(reference.getString(R.string.key_last_order), reference.getResources().getInteger(R.integer.order_id_default));
                                 Log.d(TAG, "doInBackground: last_id: " + last_id);
 
@@ -542,7 +553,36 @@ public class Requests extends AppCompatActivity
                                         reference.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                productStatusTextView.setText(reference.getString(R.string.requests_order_delivered));
+                                                if (reference.firstDelivery) {
+                                                    productStatusTextView.setText(reference.getString(R.string.requests_order_delivered_first));
+
+                                                    if (reference.shouldDisplayConfetti) {
+                                                        final KonfettiView konfettiView = reference.findViewById(R.id.confetti_view);
+                                                        konfettiView.post(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                konfettiView.build()
+                                                                        .addColors(Color.YELLOW, Color.GREEN, Color.RED, Color.BLUE, Color.MAGENTA)
+                                                                        .setDirection(0, 360)
+                                                                        .setSpeed(3f, 6f)
+                                                                        .setFadeOutEnabled(true)
+                                                                        .setTimeToLive(2000L)
+                                                                        .addShapes(Shape.RECT, Shape.CIRCLE)
+                                                                        .addSizes(new Size(12, 6f), new Size(16, 3f))
+                                                                        .setPosition(-50f, (float) konfettiView.getWidth() + 50f, 0, konfettiView.getHeight() + 50f)
+                                                                        .burst(250);
+                                                            }
+                                                        });
+
+                                                        reference.shouldDisplayConfetti = false;
+                                                    }
+
+                                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                    editor.putBoolean(reference.getString(R.string.key_first_delivery), false);
+                                                    editor.apply();
+                                                } else {
+                                                    productStatusTextView.setText(reference.getString(R.string.requests_order_delivered));
+                                                }
 
                                                 updateLastOrderId(order);
                                             }

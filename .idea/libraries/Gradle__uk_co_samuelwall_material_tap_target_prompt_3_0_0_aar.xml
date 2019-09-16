@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: uk.co.samuelwall:material-tap-target-prompt:3.0.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6cad7b880bc3fe2e85b3e8aa3f8f2fca/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6cad7b880bc3fe2e85b3e8aa3f8f2fca/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/uk.co.samuelwall/material-tap-target-prompt/3.0.0/69febf323533b63268859aff6b270a91c4b51d3f/material-tap-target-prompt-3.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

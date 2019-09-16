@@ -58,4 +58,5 @@
     <string name="requests_orders_empty">Nada por acá, ¡ordená algo!</string>
     <string name="channel_description">Notificaciones push de BuffRApp.</string>
     <string name="channel_name">Notificaciones de estado de orden</string>
+    <string name="requests_order_delivered_first">¡Felicitaciones! \nEsta es tu primera orden, y ya fue entregada. \n\nAhora vas a poder verla en el historial.</string>
 </resources>
