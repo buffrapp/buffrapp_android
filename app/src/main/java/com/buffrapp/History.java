@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,6 +29,9 @@ import com.buffrapp.ui.login.LoginActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.takusemba.spotlight.Spotlight;
+import com.takusemba.spotlight.shape.Circle;
+import com.takusemba.spotlight.target.SimpleTarget;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONArray;
@@ -60,7 +64,7 @@ public class History extends AppCompatActivity
 
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -71,7 +75,7 @@ public class History extends AppCompatActivity
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        final NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -102,6 +106,99 @@ public class History extends AppCompatActivity
                 });
 
         new NetworkWorker(this).execute();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.key_first_run_history), true)) {
+            getWindow().getDecorView().post(new Runnable() {
+                @Override
+                public void run() {
+                    float x;
+                    float y;
+
+                    x = 200f;
+                    y = toolbar.getY() + 300;
+
+                    SimpleTarget rvItemTarget = new SimpleTarget.Builder(History.this)
+                            .setPoint(x, y)
+                            .setShape(new Circle(250f))
+                            .setTitle(getString(R.string.history_review))
+                            .setDescription(getString(R.string.history_review_description))
+                            .setOverlayPoint(x + 150f, y + 250f)
+                            .build();
+
+                    Spotlight spotlight = Spotlight.with(History.this)
+                            .setOverlayColor(R.color.background)
+                            .setDuration(100L)
+                            .setAnimation(new AccelerateDecelerateInterpolator())
+                            .setTargets(rvItemTarget)
+                            .setClosedOnTouchedOutside(true);
+
+                    spotlight.start();
+                }
+            });
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.key_first_run_history), false);
+            editor.apply();
+        }
+
+        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+                if (!navigationView.getMenu().findItem(R.id.nav_history).isChecked()) {
+                    // Handle navigation view item clicks here.
+                    MenuItem menuItem = navigationView.getCheckedItem();
+
+                    if (menuItem != null) {
+                        int id = menuItem.getItemId();
+
+                        if (id == R.id.nav_products) {
+                            Intent intent = new Intent(History.this, Products.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                            startActivity(intent);
+                        } else if (id == R.id.nav_requests) {
+                            Intent intent = new Intent(History.this, Requests.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                            startActivity(intent);
+                        } else if (id == R.id.nav_history) {
+                            Intent intent = new Intent(History.this, History.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                            startActivity(intent);
+                        } else if (id == R.id.nav_schedule) {
+
+                        } else if (id == R.id.nav_profile) {
+
+                        } else if (id == R.id.nav_share) {
+
+                        } else if (id == R.id.nav_send) {
+
+                        } else if (id == R.id.nav_logout) {
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(History.this);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.remove(getString(R.string.key_session_id));
+                            editor.apply();
+
+                            Intent intent = new Intent(History.this, LoginActivity.class);
+                            startActivity(intent);
+                        }
+
+                        Log.d(TAG, "onDrawerClosed: selected ID is " + id);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -127,43 +224,8 @@ public class History extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_products) {
-            Intent intent = new Intent(this, Products.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-        } else if (id == R.id.nav_requests) {
-            Intent intent = new Intent(this, Requests.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-        } else if (id == R.id.nav_history) {
-            Intent intent = new Intent(this, History.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-        } else if (id == R.id.nav_schedule) {
-
-        } else if (id == R.id.nav_profile) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        } else if (id == R.id.nav_logout) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove(getString(R.string.key_session_id));
-            editor.apply();
-
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        }
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
-
-        Log.d(TAG, "onNavigationItemSelected: selected ID is " + id);
         return true;
     }
 

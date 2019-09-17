@@ -59,4 +59,12 @@
     <string name="channel_description">Notificaciones push de BuffRApp.</string>
     <string name="channel_name">Notificaciones de estado de orden</string>
     <string name="requests_order_delivered_first">¡Felicitaciones! \nEsta es tu primera orden, y ya fue entregada. \n\nAhora vas a poder verla en el historial.</string>
+    <string name="products_feature_discovery">Descubrí más</string>
+    <string name="products_feature_discovery_description">Tocá para ver el menú.</string>
+    <string name="products_order">Ordená</string>
+    <string name="products_order_description">Pedí un producto.</string>
+    <string name="requests_order_status">Tu orden</string>
+    <string name="requests_order_status_description">Acá, vas a poder ver el progreso de tu orden.</string>
+    <string name="history_review">Explorá</string>
+    <string name="history_review_description">Consultá tus órdenes.</string>
 </resources>
