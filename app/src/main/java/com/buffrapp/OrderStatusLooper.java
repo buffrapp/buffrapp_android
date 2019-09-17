@@ -46,6 +46,8 @@ public class OrderStatusLooper extends Service {
     private Timer timer;
     private NetworkWorker networkWorker;
 
+    private String previousStatus;
+
     public OrderStatusLooper() {
     } // I'm not implementing this, seriously.
 
@@ -103,36 +105,42 @@ public class OrderStatusLooper extends Service {
     }
 
     private void sendPushNotification(int progress, String status) {
-        Log.d(TAG, "doInBackground: sending push notification...");
+        if (status != previousStatus) {
+            Log.d(TAG, "doInBackground: sending push notification...");
 
-        final int PROGRESS_MAX = 100;
+            final int PROGRESS_MAX = 100;
 
-        String channel_name = getString(R.string.channel_name);
+            String channel_name = getString(R.string.channel_name);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(channel_name, channel_name, importance);
-            channel.setDescription(description);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                String description = getString(R.string.channel_description);
+                int importance = NotificationManager.IMPORTANCE_DEFAULT;
+                NotificationChannel channel = new NotificationChannel(channel_name, channel_name, importance);
+                channel.setDescription(description);
+                NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                notificationManager.createNotificationChannel(channel);
+            }
+
+            Intent intent = new Intent(this, Requests.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channel_name)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setContentText(status)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(status))
+                    .setContentIntent(pendingIntent)
+                    .setProgress(PROGRESS_MAX, progress, false)
+                    .setOngoing(true);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager.notify(getResources().getInteger(R.integer.notification_id), notificationBuilder.build());
+
+            previousStatus = status;
+        } else {
+            Log.d(TAG, "sendPushNotification: aborted request, duplicated status detected.");
         }
-
-        Intent intent = new Intent(this, Requests.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channel_name)
-                .setSmallIcon(R.drawable.logo)
-                .setContentTitle(getString(R.string.app_name))
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setContentText(status)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(status))
-                .setContentIntent(pendingIntent)
-                .setProgress(PROGRESS_MAX, progress, false)
-                .setOngoing(true);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(getResources().getInteger(R.integer.notification_id), notificationBuilder.build());
     }
 
     private void removePushNotification() {
