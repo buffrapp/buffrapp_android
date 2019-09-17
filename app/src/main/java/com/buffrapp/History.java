@@ -57,6 +57,8 @@ public class History extends AppCompatActivity
 
     private HistoryAdapter historyAdapter;
 
+    private int navCurrentId = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,36 +157,35 @@ public class History extends AppCompatActivity
             public void onDrawerStateChanged(int newState) {
             }
 
+            @SuppressWarnings("ConstantConditions")
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
-                if (!navigationView.getMenu().findItem(R.id.nav_history).isChecked()) {
+                if (navCurrentId != R.id.nav_history) {
                     // Handle navigation view item clicks here.
-                    MenuItem menuItem = navigationView.getCheckedItem();
-
-                    if (menuItem != null) {
-                        int id = menuItem.getItemId();
-
-                        if (id == R.id.nav_products) {
+                    if (navCurrentId < 0) {
+                        Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
+                    } else {
+                        if (navCurrentId == R.id.nav_products) {
                             Intent intent = new Intent(History.this, Products.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_requests) {
+                        } else if (navCurrentId == R.id.nav_requests) {
                             Intent intent = new Intent(History.this, Requests.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_history) {
+                        } else if (navCurrentId == R.id.nav_history) {
                             Intent intent = new Intent(History.this, History.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_schedule) {
+                        } else if (navCurrentId == R.id.nav_schedule) {
 
-                        } else if (id == R.id.nav_profile) {
+                        } else if (navCurrentId == R.id.nav_profile) {
 
-                        } else if (id == R.id.nav_share) {
+                        } else if (navCurrentId == R.id.nav_share) {
 
-                        } else if (id == R.id.nav_send) {
+                        } else if (navCurrentId == R.id.nav_send) {
 
-                        } else if (id == R.id.nav_logout) {
+                        } else if (navCurrentId == R.id.nav_logout) {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(History.this);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.remove(getString(R.string.key_session_id));
@@ -194,7 +195,7 @@ public class History extends AppCompatActivity
                             startActivity(intent);
                         }
 
-                        Log.d(TAG, "onDrawerClosed: selected ID is " + id);
+                        Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
                     }
                 }
             }

@@ -69,6 +69,8 @@ public class Products extends AppCompatActivity
     private ProductsAdapter productsAdapter;
     private RecyclerView recyclerView;
 
+    private int navCurrentId = -1;
+
     private int productId = -1;
     private DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
         @Override
@@ -166,36 +168,32 @@ public class Products extends AppCompatActivity
             public void onDrawerStateChanged(int newState) {
             }
 
+            @SuppressWarnings("ConstantConditions")
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
-                if (!navigationView.getMenu().findItem(R.id.nav_products).isChecked()) {
+                if (navCurrentId != R.id.nav_products) {
                     // Handle navigation view item clicks here.
-                    MenuItem menuItem = navigationView.getCheckedItem();
-
-                    if (menuItem != null) {
-                        int id = menuItem.getItemId();
-
-                        if (id == R.id.nav_products) {
-                            Intent intent = new Intent(Products.this, Products.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                            startActivity(intent);
-                        } else if (id == R.id.nav_requests) {
+                    if (navCurrentId < 0) {
+                        Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
+                    } else {
+                        if (navCurrentId == R.id.nav_requests) {
                             Intent intent = new Intent(Products.this, Requests.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_history) {
+                        } else if (navCurrentId == R.id.nav_history) {
                             Intent intent = new Intent(Products.this, History.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_schedule) {
+                        } else if (navCurrentId == R.id.nav_schedule) {
 
-                        } else if (id == R.id.nav_profile) {
+                        } else if (navCurrentId == R.id.nav_profile) {
 
-                        } else if (id == R.id.nav_share) {
+                        } else if (navCurrentId == R.id.nav_share) {
 
-                        } else if (id == R.id.nav_send) {
+                        } else if (navCurrentId == R.id.nav_send) {
 
-                        } else if (id == R.id.nav_logout) {
+                        } else if (navCurrentId == R.id.nav_logout) {
+                            Log.d(TAG, "onDrawerClosed: clearing session and restarting...");
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Products.this);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.remove(getString(R.string.key_session_id));
@@ -205,7 +203,7 @@ public class Products extends AppCompatActivity
                             startActivity(intent);
                         }
 
-                        Log.d(TAG, "onDrawerClosed: selected ID is " + id);
+                        Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
                     }
                 }
             }
@@ -310,6 +308,7 @@ public class Products extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        navCurrentId = item.getItemId();
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

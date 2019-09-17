@@ -75,6 +75,8 @@ public class Requests extends AppCompatActivity
     private static Timer timer;
     private static NetworkWorker networkWorker;
 
+    private int navCurrentId = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -222,34 +224,32 @@ public class Requests extends AppCompatActivity
 
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
-                if (!navigationView.getMenu().findItem(R.id.nav_requests).isChecked()) {
+                if (navCurrentId != R.id.nav_requests) {
                     // Handle navigation view item clicks here.
-                    MenuItem menuItem = navigationView.getCheckedItem();
-
-                    if (menuItem != null) {
-                        int id = menuItem.getItemId();
-
-                        if (id == R.id.nav_products) {
+                    if (navCurrentId < 0) {
+                        Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
+                    } else {
+                        if (navCurrentId == R.id.nav_products) {
                             Intent intent = new Intent(Requests.this, Products.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_requests) {
+                        } else if (navCurrentId == R.id.nav_requests) {
                             Intent intent = new Intent(Requests.this, Requests.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_history) {
+                        } else if (navCurrentId == R.id.nav_history) {
                             Intent intent = new Intent(Requests.this, History.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
-                        } else if (id == R.id.nav_schedule) {
+                        } else if (navCurrentId == R.id.nav_schedule) {
 
-                        } else if (id == R.id.nav_profile) {
+                        } else if (navCurrentId == R.id.nav_profile) {
 
-                        } else if (id == R.id.nav_share) {
+                        } else if (navCurrentId == R.id.nav_share) {
 
-                        } else if (id == R.id.nav_send) {
+                        } else if (navCurrentId == R.id.nav_send) {
 
-                        } else if (id == R.id.nav_logout) {
+                        } else if (navCurrentId == R.id.nav_logout) {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Requests.this);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.remove(getString(R.string.key_session_id));
@@ -259,7 +259,7 @@ public class Requests extends AppCompatActivity
                             startActivity(intent);
                         }
 
-                        Log.d(TAG, "onDrawerClosed: selected ID is " + id);
+                        Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
                     }
                 }
             }
@@ -301,6 +301,7 @@ public class Requests extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        navCurrentId = item.getItemId();
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -659,6 +660,8 @@ public class Requests extends AppCompatActivity
                             }
 
                     }
+
+                    Log.d(TAG, "doInBackground: stringBuilder: " + stringBuilder.toString());
                 } catch (Exception e) {
                     showInternalError();
                     e.printStackTrace();
