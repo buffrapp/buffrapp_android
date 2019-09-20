@@ -209,7 +209,7 @@ public class LoginActivity extends AppCompatActivity {
             usernameEditText = reference.findViewById(R.id.username);
             passwordEditText = reference.findViewById(R.id.password);
 
-            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_ip) + reference.getString(R.string.server_path);
+            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
             Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
 
             try {
