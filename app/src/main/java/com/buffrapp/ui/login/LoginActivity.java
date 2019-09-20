@@ -174,6 +174,7 @@ public class LoginActivity extends AppCompatActivity {
     private void updateUiWithUser() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
