@@ -24,4 +24,8 @@
     </style>
 
     <style name="LoginActivity" parent="AppTheme.NoActionBar" />
+
+    <style name="NoTransitions" parent="AppTheme.NoActionBar">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
 </resources>

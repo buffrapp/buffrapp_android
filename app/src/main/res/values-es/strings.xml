@@ -71,4 +71,5 @@
     <string name="products_error_malformed_url">No fue posible armar la URL que necesitamos, \n¿modificaste la aplicación?</string>
     <string name="internal_error">No fue posible procesar tu solicitud correctamente.</string>
     <string name="not_allowed_error">No podés hacer eso, por favor cerrá sesión y entrá de nuevo.</string>
+    <string name="title_activity_profile">Perfil</string>
 </resources>

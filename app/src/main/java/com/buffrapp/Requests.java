@@ -231,15 +231,9 @@ public class Requests extends AppCompatActivity
                     } else {
                         if (navCurrentId == R.id.nav_products) {
                             Intent intent = new Intent(Requests.this, Products.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_requests) {
-                            Intent intent = new Intent(Requests.this, Requests.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
                         } else if (navCurrentId == R.id.nav_history) {
                             Intent intent = new Intent(Requests.this, History.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(intent);
                         } else if (navCurrentId == R.id.nav_schedule) {
 
@@ -260,6 +254,8 @@ public class Requests extends AppCompatActivity
                         }
 
                         Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
+
+                        finish();
                     }
                 }
             }

@@ -16,8 +16,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setContentView(R.layout.activity_main);
-        setTheme(R.style.LoginActivity);
 
         String session_id = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_session_id), null);
         if (session_id == null) {
@@ -37,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: session ID found, it was \"" + session_id + "\", loading Products...");
             Intent intent = new Intent(this, Products.class);
             startActivity(intent);
+            finish();
         }
     }
 }
