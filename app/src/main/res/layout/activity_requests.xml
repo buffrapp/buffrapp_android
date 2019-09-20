@@ -126,6 +126,18 @@
                     android:textColor="@color/colorGreySemitransparent"
                     android:textSize="20sp"
                     android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tv_error_extra"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_error"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:textAlignment="center"
+                    android:textColor="@color/black_semitransparent"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
             </RelativeLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </RelativeLayout>

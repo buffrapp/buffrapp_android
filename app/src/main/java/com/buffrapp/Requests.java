@@ -317,7 +317,7 @@ public class Requests extends AppCompatActivity
             this.requestsActivity = new WeakReference<>(requestsActivity);
         }
 
-        private void showInternalError() {
+        private void showInternalError(final String message) {
             Log.d(TAG, "doInBackground: an internal error has occurred.");
             final Requests reference = requestsActivity.get();
 
@@ -336,6 +336,7 @@ public class Requests extends AppCompatActivity
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
+                    TextView errorExtraTextView = reference.findViewById(R.id.tv_error_extra);
 
                     ImageView emptyImageView = reference.findViewById(R.id.ic_empty);
                     TextView emptyTextView = reference.findViewById(R.id.tv_empty);
@@ -347,6 +348,8 @@ public class Requests extends AppCompatActivity
 
                     errorImageView.setVisibility(View.VISIBLE);
                     errorTextView.setVisibility(View.VISIBLE);
+                    errorExtraTextView.setText(message);
+                    errorExtraTextView.setVisibility(View.VISIBLE);
 
                     emptyImageView.setVisibility(View.GONE);
                     emptyTextView.setVisibility(View.GONE);
@@ -530,10 +533,10 @@ public class Requests extends AppCompatActivity
 
                     switch (stringBuilder.toString()) {
                         case ORDER_ERROR:
-                            showInternalError();
+                            showInternalError(reference.getString(R.string.internal_error));
                             break;
                         case ORDERS_NOT_ALLOWED:
-                            showInternalError();
+                            showInternalError(reference.getString(R.string.not_allowed_error));
                             break;
                         case ORDERS_NO_ORDERS:
                             showNoOrders();
@@ -656,14 +659,14 @@ public class Requests extends AppCompatActivity
                                     showDataFields();
                                 }
                             } else {
-                                showInternalError();
+                                showInternalError(reference.getString(R.string.internal_error));
                             }
 
                     }
 
                     Log.d(TAG, "doInBackground: stringBuilder: " + stringBuilder.toString());
                 } catch (Exception e) {
-                    showInternalError();
+                    showInternalError(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
                     e.printStackTrace();
                 } finally {
                     if (httpsURLConnection != null) {
@@ -671,6 +674,7 @@ public class Requests extends AppCompatActivity
                     }
                 }
             } catch (final MalformedURLException e) {
+                showInternalError(reference.getString(R.string.products_error_malformed_url));
                 e.printStackTrace();
             }
             return null;

@@ -232,11 +232,73 @@ public class History extends AppCompatActivity
     }
 
     private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
-        private static final int NOT_ALLOWED = 2;
         private WeakReference<History> historyActivity;
+
+        private static final String HISTORY_ERROR = "1";
+        private static final String HISTORY_NOT_ALLOWED = "2";
+        private static final String HISTORY_EMPTY_RESULT = "3";
 
         NetworkWorker(History historyActivity) {
             this.historyActivity = new WeakReference<>(historyActivity);
+        }
+
+        private void showInternalError(final String message) {
+            Log.d(TAG, "doInBackground: an internal error has occurred.");
+            final History reference = historyActivity.get();
+
+            if (historyActivity == null) {
+                Log.d(TAG, "doInBackground: showInternalError: failed to get a reference.");
+                return;
+            }
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView icNoHistory = reference.findViewById(R.id.icEmptyHistory);
+                    TextView tvNoHistory = reference.findViewById(R.id.tvEmptyHistory);
+                    RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
+                    ImageView icError = reference.findViewById(R.id.icError);
+                    TextView tvError = reference.findViewById(R.id.tvError);
+                    TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
+
+                    icNoHistory.setVisibility(View.GONE);
+                    tvNoHistory.setVisibility(View.GONE);
+                    icError.setVisibility(View.VISIBLE);
+                    tvError.setVisibility(View.VISIBLE);
+                    tvErrorExtra.setVisibility(View.VISIBLE);
+                    tvErrorExtra.setText(message);
+                    recyclerView.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        private void showNoHistory() {
+            Log.d(TAG, "doInBackground: no ongoing orders found.");
+            final History reference = historyActivity.get();
+
+            if (historyActivity == null) {
+                Log.d(TAG, "doInBackground: showNoOrders: failed to get a reference.");
+                return;
+            }
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView icNoHistory = reference.findViewById(R.id.icEmptyHistory);
+                    TextView tvNoHistory = reference.findViewById(R.id.tvEmptyHistory);
+                    RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
+                    ImageView icError = reference.findViewById(R.id.icError);
+                    TextView tvError = reference.findViewById(R.id.tvError);
+                    TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
+
+                    icNoHistory.setVisibility(View.VISIBLE);
+                    tvNoHistory.setVisibility(View.VISIBLE);
+                    icError.setVisibility(View.VISIBLE);
+                    tvError.setVisibility(View.VISIBLE);
+                    tvErrorExtra.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.GONE);
+                }
+            });
         }
 
         @Override
@@ -294,63 +356,46 @@ public class History extends AppCompatActivity
 
                     Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
 
-                    final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                    switch (stringBuilder.toString()) {
+                        case HISTORY_ERROR:
+                            showInternalError(reference.getString(R.string.internal_error));
+                            break;
+                        case HISTORY_NOT_ALLOWED:
+                            showInternalError(reference.getString(R.string.not_allowed_error));
+                            break;
+                        case HISTORY_EMPTY_RESULT:
+                            showNoHistory();
+                            break;
+                        default:
+                            final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
 
-                    if (jsonArray.length() > 0 && !stringBuilder.toString().equals(String.valueOf(NOT_ALLOWED))) {
-                        Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
+                            if (jsonArray.length() > 0) {
+                                Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
 
-                        reference.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                reference.historyAdapter.setNewData(jsonArray);
+                                reference.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        reference.historyAdapter.setNewData(jsonArray);
+
+                                        ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
+                                        TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
+                                        RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
+                                        ImageView icError = reference.findViewById(R.id.icError);
+                                        TextView tvError = reference.findViewById(R.id.tvError);
+
+                                        icNoProducts.setVisibility(View.GONE);
+                                        tvNoProducts.setVisibility(View.GONE);
+                                        icError.setVisibility(View.GONE);
+                                        tvError.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                    }
+                                });
+                            } else {
+                                showNoHistory();
                             }
-                        });
-
-                        reference.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
-                                ImageView icError = reference.findViewById(R.id.icError);
-                                TextView tvError = reference.findViewById(R.id.tvError);
-
-                                icNoProducts.setVisibility(View.GONE);
-                                tvNoProducts.setVisibility(View.GONE);
-                                icError.setVisibility(View.GONE);
-                                tvError.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                    } else {
-                        reference.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
-                                ImageView icError = reference.findViewById(R.id.icError);
-                                TextView tvError = reference.findViewById(R.id.tvError);
-
-                                icNoProducts.setVisibility(View.VISIBLE);
-                                tvNoProducts.setVisibility(View.VISIBLE);
-                                icError.setVisibility(View.GONE);
-                                tvError.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.GONE);
-                            }
-                        });
                     }
                 } catch (Exception e) {
-                    reference.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ImageView icError = reference.findViewById(R.id.icError);
-                            TextView tvError = reference.findViewById(R.id.tvError);
-
-                            icError.setVisibility(View.VISIBLE);
-                            tvError.setVisibility(View.VISIBLE);
-                        }
-                    });
+                    showInternalError(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
                     e.printStackTrace();
                 } finally {
                     if (httpsURLConnection != null) {
@@ -358,6 +403,7 @@ public class History extends AppCompatActivity
                     }
                 }
             } catch (final MalformedURLException e) {
+                showInternalError(reference.getString(R.string.products_error_malformed_url));
                 e.printStackTrace();
             }
             return null;

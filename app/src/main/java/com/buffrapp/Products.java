@@ -384,11 +384,13 @@ public class Products extends AppCompatActivity
                                 RecyclerView recyclerView = reference.findViewById(R.id.rv_products);
                                 ImageView icError = reference.findViewById(R.id.icError);
                                 TextView tvError = reference.findViewById(R.id.tvError);
+                                TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
 
                                 icNoProducts.setVisibility(View.GONE);
                                 tvNoProducts.setVisibility(View.GONE);
                                 icError.setVisibility(View.GONE);
                                 tvError.setVisibility(View.GONE);
+                                tvErrorExtra.setVisibility(View.GONE);
                                 recyclerView.setVisibility(View.VISIBLE);
                             }
                         });
@@ -401,24 +403,29 @@ public class Products extends AppCompatActivity
                                 RecyclerView recyclerView = reference.findViewById(R.id.rv_products);
                                 ImageView icError = reference.findViewById(R.id.icError);
                                 TextView tvError = reference.findViewById(R.id.tvError);
+                                TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
 
                                 icNoProducts.setVisibility(View.VISIBLE);
                                 tvNoProducts.setVisibility(View.VISIBLE);
                                 icError.setVisibility(View.GONE);
                                 tvError.setVisibility(View.GONE);
+                                tvErrorExtra.setVisibility(View.GONE);
                                 recyclerView.setVisibility(View.GONE);
                             }
                         });
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     reference.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             ImageView icError = reference.findViewById(R.id.icError);
                             TextView tvError = reference.findViewById(R.id.tvError);
+                            TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
 
                             icError.setVisibility(View.VISIBLE);
                             tvError.setVisibility(View.VISIBLE);
+                            tvErrorExtra.setText(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
+                            tvErrorExtra.setVisibility(View.VISIBLE);
                         }
                     });
                     e.printStackTrace();
@@ -428,6 +435,19 @@ public class Products extends AppCompatActivity
                     }
                 }
             } catch (final MalformedURLException e) {
+                reference.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ImageView icError = reference.findViewById(R.id.icError);
+                        TextView tvError = reference.findViewById(R.id.tvError);
+                        TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
+
+                        icError.setVisibility(View.VISIBLE);
+                        tvError.setVisibility(View.VISIBLE);
+                        tvErrorExtra.setText(reference.getString(R.string.products_error_malformed_url));
+                        tvErrorExtra.setVisibility(View.VISIBLE);
+                    }
+                });
                 e.printStackTrace();
             }
             return null;
@@ -467,6 +487,7 @@ public class Products extends AppCompatActivity
     private static class OrderRequestNetworkWorker extends AsyncTask<Void, Void, Void> {
         private static final String ORDER_PASS = "0";
         private static final String ORDER_ERROR = "1";
+        private static final String ORDER_NOT_ALLOWED = "2";
         private static final String ORDER_ALREADY_ORDERED = "3";
         private WeakReference<Products> productsActivity;
         private int productId = -1;
@@ -563,6 +584,14 @@ public class Products extends AppCompatActivity
                                 @Override
                                 public void run() {
                                     Toast.makeText(reference, reference.getString(R.string.products_error), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            break;
+                        case ORDER_NOT_ALLOWED:
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(reference, reference.getString(R.string.not_allowed_error), Toast.LENGTH_LONG).show();
                                 }
                             });
                             break;

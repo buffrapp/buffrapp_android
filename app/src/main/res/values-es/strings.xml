@@ -67,4 +67,8 @@
     <string name="requests_order_status_description">Acá, vas a poder ver el progreso de tu orden.</string>
     <string name="history_review">Explorá</string>
     <string name="history_review_description">Consultá tus órdenes.</string>
+    <string name="products_error_server_failure">El servidor en %s no respondió a tiempo: \nestá sobrecargado o desconectado.</string>
+    <string name="products_error_malformed_url">No fue posible armar la URL que necesitamos, \n¿modificaste la aplicación?</string>
+    <string name="internal_error">No fue posible procesar tu solicitud correctamente.</string>
+    <string name="not_allowed_error">No podés hacer eso, por favor cerrá sesión y entrá de nuevo.</string>
 </resources>
