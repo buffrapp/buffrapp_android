@@ -429,7 +429,7 @@ public class Requests extends AppCompatActivity
             });
         }
 
-        private void setProgressBarStatus(int progress, int color) {
+        private void setProgressBarStatus(final int progress, final int color) {
             Log.d(TAG, "doInBackground: an order has been found.");
             final Requests reference = requestsActivity.get();
 
@@ -438,12 +438,17 @@ public class Requests extends AppCompatActivity
                 return;
             }
 
-            ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
 
-            Drawable drawable = DrawableCompat.wrap(progressBar.getProgressDrawable());
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(reference, color));
-            progressBar.setProgressDrawable(DrawableCompat.unwrap(drawable));
-            progressBar.setProgress(progress);
+                    Drawable drawable = DrawableCompat.wrap(progressBar.getProgressDrawable());
+                    DrawableCompat.setTint(drawable, ContextCompat.getColor(reference, color));
+                    progressBar.setProgressDrawable(DrawableCompat.unwrap(drawable));
+                    progressBar.setProgress(progress);
+                }
+            });
         }
 
         private void updateLastOrderId(JSONObject order) {
