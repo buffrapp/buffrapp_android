@@ -78,6 +78,7 @@
     <string name="order_cancelled">The order was cancelled.</string>
     <string name="history_review">Explore</string>
     <string name="history_review_description">Review your orders.</string>
+    <string name="no_history">Nothing here, \nwhy don\'t you order something?</string>
 
     <!-- Requests -->
     <string name="requests_order_received">Your order has been received and awaits confirmation, \nyou\'ll be notified once there\'s any movement. \n\nIf you want, you can now close or minimize the application</string>

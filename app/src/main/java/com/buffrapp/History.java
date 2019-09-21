@@ -174,7 +174,8 @@ public class History extends AppCompatActivity
                         } else if (navCurrentId == R.id.nav_schedule) {
 
                         } else if (navCurrentId == R.id.nav_profile) {
-
+                            Intent intent = new Intent(History.this, Profile.class);
+                            startActivity(intent);
                         } else if (navCurrentId == R.id.nav_share) {
 
                         } else if (navCurrentId == R.id.nav_send) {
@@ -289,8 +290,8 @@ public class History extends AppCompatActivity
 
                     icNoHistory.setVisibility(View.VISIBLE);
                     tvNoHistory.setVisibility(View.VISIBLE);
-                    icError.setVisibility(View.VISIBLE);
-                    tvError.setVisibility(View.VISIBLE);
+                    icError.setVisibility(View.GONE);
+                    tvError.setVisibility(View.GONE);
                     tvErrorExtra.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.GONE);
                 }

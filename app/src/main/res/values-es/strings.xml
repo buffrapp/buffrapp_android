@@ -32,6 +32,7 @@
     <string name="login_crash">No pudimos comunicarnos con el servidor, por favor intentálo otra vez más tarde.</string>
     <string name="login_inconsistent">Se encontró un problema en la base de datos y tu cuenta no puede cargarsae, por favor contactános.</string>
     <string name="no_products">No hay nada que ver acá, \n¿te gustaría probar actualizando?</string>
+    <string name="no_history">No hay nada que ver acá, \n¿por qué no pedís algo?</string>
     <string name="products_error">Hubo un problema, \n¿querés probar otra vez?</string>
     <string name="products_order_confirmation">¿Querés pedir %s?</string>
     <string name="dialog_no">No</string>
