@@ -20,30 +20,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         KeyguardManager keyguardManager = (KeyguardManager) this.getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager.isKeyguardLocked()) {
-            finish();
-            return;
-        }
+        if (!keyguardManager.isKeyguardLocked()) {
+            String session_id = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_session_id), null);
+            if (session_id == null) {
+                Log.d(TAG, "onCreate: session ID was null, loading LoginActivity...");
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+            } else {
+                Intent orderStatusLooperIntent = new Intent(this, OrderStatusLooper.class);
+                stopService(orderStatusLooperIntent);
 
-        String session_id = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_session_id), null);
-        if (session_id == null) {
-            Log.d(TAG, "onCreate: session ID was null, loading LoginActivity...");
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        } else {
-            Intent orderStatusLooperIntent = new Intent(this, OrderStatusLooper.class);
-            stopService(orderStatusLooperIntent);
+                try {
+                    startService(orderStatusLooperIntent);
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                }
 
-            try {
-                startService(orderStatusLooperIntent);
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
+                Log.d(TAG, "onCreate: session ID found, it was \"" + session_id + "\", loading Products...");
+                Intent intent = new Intent(this, Products.class);
+                startActivity(intent);
             }
-
-            Log.d(TAG, "onCreate: session ID found, it was \"" + session_id + "\", loading Products...");
-            Intent intent = new Intent(this, Products.class);
-            startActivity(intent);
-            finish();
         }
+
+        finish();
     }
 }
