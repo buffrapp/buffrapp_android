@@ -250,11 +250,8 @@ public class Requests extends AppCompatActivity
                         } else if (navCurrentId == R.id.nav_schedule) {
 
                         } else if (navCurrentId == R.id.nav_profile) {
-
-                        } else if (navCurrentId == R.id.nav_share) {
-
-                        } else if (navCurrentId == R.id.nav_send) {
-
+                            Intent intent = new Intent(Requests.this, Profile.class);
+                            startActivity(intent);
                         } else if (navCurrentId == R.id.nav_logout) {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Requests.this);
                             SharedPreferences.Editor editor = sharedPreferences.edit();

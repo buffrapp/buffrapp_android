@@ -41,7 +41,6 @@ public class OrderStatusLooper extends Service {
 
     private static final String TAG = "OrderStatusLooper";
 
-    private boolean shouldKeepCycling;
     private boolean shouldKeepNotification;
     private Timer timer;
     private NetworkWorker networkWorker;
@@ -55,7 +54,6 @@ public class OrderStatusLooper extends Service {
     public void onCreate() {
         super.onCreate();
 
-        shouldKeepCycling = true;
         shouldKeepNotification = false;
 
         timer = new Timer();
@@ -119,6 +117,7 @@ public class OrderStatusLooper extends Service {
                 channel.setDescription(description);
                 NotificationManager notificationManager = getSystemService(NotificationManager.class);
                 notificationManager.createNotificationChannel(channel);
+                channel.enableVibration(true);
             }
 
             Intent intent = new Intent(this, Requests.class);
@@ -132,6 +131,7 @@ public class OrderStatusLooper extends Service {
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(status))
                     .setContentIntent(pendingIntent)
                     .setProgress(PROGRESS_MAX, progress, false)
+                    .setVibrate(new long[]{500, 500, 500, 5000, 15000})
                     .setOngoing(true);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);

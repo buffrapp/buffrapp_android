@@ -8,7 +8,6 @@
     <string name="invalid_username">No es un nombre de usuario válido.</string>
     <string name="login_failed">No pudimos encontrar una cuenta que coincida con esa combinación, por favor intentálo nuevamente.</string>
     <string name="menu_send">Enviar</string>
-    <string name="menu_share">Compartir</string>
     <string name="menu_slideshow">Presentación</string>
     <string name="menu_tools">Herrramientas</string>
     <string name="nav_header_desc">Cabecera de navegación</string>
@@ -23,7 +22,6 @@
     <string name="menu_profile">Perfil</string>
     <string name="navigation_drawer_close">Cerrar caja de navegación</string>
     <string name="navigation_drawer_open" translatable="false">Abrir caja de navegación</string>
-    <string name="menu_comunicate">Comunicáte</string>
     <string name="menu_home">Inicio</string>
     <string name="title_activity_history">Historial</string>
     <string name="title_activity_requests">Pedidos</string>

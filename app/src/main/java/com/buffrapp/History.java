@@ -167,10 +167,6 @@ public class History extends AppCompatActivity
                         } else if (navCurrentId == R.id.nav_profile) {
                             Intent intent = new Intent(History.this, Profile.class);
                             startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_share) {
-
-                        } else if (navCurrentId == R.id.nav_send) {
-
                         } else if (navCurrentId == R.id.nav_logout) {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(History.this);
                             SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -176,11 +176,8 @@ public class Products extends AppCompatActivity
                         } else if (navCurrentId == R.id.nav_schedule) {
 
                         } else if (navCurrentId == R.id.nav_profile) {
-
-                        } else if (navCurrentId == R.id.nav_share) {
-
-                        } else if (navCurrentId == R.id.nav_send) {
-
+                            Intent intent = new Intent(Products.this, Profile.class);
+                            startActivity(intent);
                         } else if (navCurrentId == R.id.nav_logout) {
                             Log.d(TAG, "onDrawerClosed: clearing session and restarting...");
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Products.this);
