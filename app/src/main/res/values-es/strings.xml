@@ -73,4 +73,8 @@
     <string name="internal_error">No fue posible procesar tu solicitud correctamente.</string>
     <string name="not_allowed_error">No podés hacer eso, por favor cerrá sesión y entrá de nuevo.</string>
     <string name="title_activity_profile">Perfil</string>
+    <string name="action_request_cancel">Cancelar orden</string>
+    <string name="requests_order_cancel_confirmation">¿Querés cancelar tu orden de %s?</string>
+    <string name="requests_order_cancel_failed">Hubo un problema al cancelar tu orden, por favor intentálo otra vez.</string>
+    <string name="requests_order_cancel_success">Tu orden fue cancelada.</string>
 </resources>

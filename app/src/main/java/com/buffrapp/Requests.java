@@ -1,5 +1,6 @@
 package com.buffrapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -15,12 +16,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -75,6 +79,20 @@ public class Requests extends AppCompatActivity
 
     private int navCurrentId = -1;
 
+    private DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    OrderCancelNetworkWorker orderCancelNetworkWorker = new OrderCancelNetworkWorker(Requests.this);
+                    orderCancelNetworkWorker.execute();
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +115,10 @@ public class Requests extends AppCompatActivity
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         final NavigationView navigationView = findViewById(R.id.nav_view);
+
+        final TextView productNameTextView = findViewById(R.id.requests_order_product_name);
+        Button cancelButton = findViewById(R.id.requests_order_cancel);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -250,6 +272,18 @@ public class Requests extends AppCompatActivity
                 }
             }
         });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(Requests.this);
+
+                builder.setMessage(String.format(getString(R.string.requests_order_cancel_confirmation), productNameTextView.getText()))
+                        .setPositiveButton(getString(R.string.dialog_yes), dialogClickListener)
+                        .setNegativeButton(getString(R.string.dialog_no), dialogClickListener)
+                        .show();
+            }
+        });
     }
 
     @Override
@@ -319,6 +353,7 @@ public class Requests extends AppCompatActivity
                     TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
                     TextView statusTextView = reference.findViewById(R.id.requests_order_status);
                     ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
+                    Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
@@ -331,6 +366,7 @@ public class Requests extends AppCompatActivity
                     productNameTextView.setVisibility(View.GONE);
                     statusTextView.setVisibility(View.GONE);
                     progressBar.setVisibility(View.GONE);
+                    cancelButton.setVisibility(View.GONE);
 
                     errorImageView.setVisibility(View.VISIBLE);
                     errorTextView.setVisibility(View.VISIBLE);
@@ -359,6 +395,7 @@ public class Requests extends AppCompatActivity
                     TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
                     TextView statusTextView = reference.findViewById(R.id.requests_order_status);
                     ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
+                    Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
@@ -371,6 +408,7 @@ public class Requests extends AppCompatActivity
                     productNameTextView.setVisibility(View.GONE);
                     statusTextView.setVisibility(View.GONE);
                     progressBar.setVisibility(View.GONE);
+                    cancelButton.setVisibility(View.GONE);
 
                     errorImageView.setVisibility(View.GONE);
                     errorTextView.setVisibility(View.GONE);
@@ -574,6 +612,16 @@ public class Requests extends AppCompatActivity
 
                                     final TextView productStatusTextView = reference.findViewById(R.id.requests_order_status);
 
+                                    // On most cases it should be gone, so this will be the default behavior.
+                                    final Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
+
+                                    reference.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            cancelButton.setVisibility(View.GONE);
+                                        }
+                                    });
+
                                     if (!order.isNull("DNI_Cancelado")) {
                                         Log.d(TAG, "doInBackground: the order has been cancelled.");
                                         setProgressBarStatus(0, R.color.colorRed);
@@ -591,6 +639,7 @@ public class Requests extends AppCompatActivity
                                             @Override
                                             public void run() {
                                                 productStatusTextView.setText(reference.getString(R.string.requests_order_received));
+                                                cancelButton.setVisibility(View.VISIBLE);
                                             }
                                         });
                                     } else if (order.isNull("FH_Listo")) {
@@ -657,6 +706,174 @@ public class Requests extends AppCompatActivity
                                 showInternalError(reference.getString(R.string.internal_error));
                             }
 
+                    }
+
+                    Log.d(TAG, "doInBackground: stringBuilder: " + stringBuilder.toString());
+                } catch (Exception e) {
+                    showInternalError(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
+                    e.printStackTrace();
+                } finally {
+                    if (httpsURLConnection != null) {
+                        httpsURLConnection.disconnect();
+                    }
+                }
+            } catch (final MalformedURLException e) {
+                showInternalError(reference.getString(R.string.products_error_malformed_url));
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            Requests reference = requestsActivity.get();
+
+            if (requestsActivity != null) {
+                SwipeRefreshLayout swipeRefreshLayout = reference.findViewById(R.id.swipeRefreshLayout);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        }
+    }
+
+    private static class OrderCancelNetworkWorker extends AsyncTask<Void, Void, Void> {
+        private static final String CANCEL_PASS = "0";
+        private static final String CANCEL_ERROR = "1";
+        private static final String CANCEL_NOT_ALLOWED = "2";
+        private WeakReference<Requests> requestsActivity;
+
+        OrderCancelNetworkWorker(Requests requestsActivity) {
+            this.requestsActivity = new WeakReference<>(requestsActivity);
+        }
+
+        private void showInternalError(final String message) {
+            Log.d(TAG, "doInBackground: an internal error has occurred.");
+            final Requests reference = requestsActivity.get();
+
+            if (requestsActivity == null) {
+                Log.d(TAG, "doInBackground: showInternalError: failed to get a reference.");
+                return;
+            }
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(reference, message, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        private void showNoOrders() {
+            Log.d(TAG, "doInBackground: no ongoing orders found.");
+            final Requests reference = requestsActivity.get();
+
+            if (requestsActivity == null) {
+                Log.d(TAG, "doInBackground: showNoOrders: failed to get a reference.");
+                return;
+            }
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView requestsImageView = reference.findViewById(R.id.ic_requests);
+                    TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
+                    TextView statusTextView = reference.findViewById(R.id.requests_order_status);
+                    ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
+                    Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
+
+                    ImageView errorImageView = reference.findViewById(R.id.ic_error);
+                    TextView errorTextView = reference.findViewById(R.id.tv_error);
+
+                    ImageView emptyImageView = reference.findViewById(R.id.ic_empty);
+                    TextView emptyTextView = reference.findViewById(R.id.tv_empty);
+
+                    requestsImageView.setVisibility(View.GONE);
+                    productNameTextView.setVisibility(View.GONE);
+                    statusTextView.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+                    cancelButton.setVisibility(View.GONE);
+
+                    errorImageView.setVisibility(View.GONE);
+                    errorTextView.setVisibility(View.GONE);
+
+                    emptyImageView.setVisibility(View.VISIBLE);
+                    emptyTextView.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            final Requests reference = requestsActivity.get();
+
+            if (requestsActivity == null) {
+                Log.d(TAG, "doInBackground: failed to get a reference.");
+                return null;
+            }
+
+            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
+            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+
+            try {
+                URL url = new URL(preURL);
+                HttpsURLConnection httpsURLConnection = null;
+
+                try {
+                    // Try to open a connection.
+                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
+                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
+
+                    // Set the cookies.
+                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
+                    Log.d(TAG, "doInBackground: cookie: " + cookie);
+                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
+
+                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
+                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+                    Uri.Builder builder = new Uri.Builder()
+                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_cancelOrder));
+
+                    String query = builder.build().getEncodedQuery();
+                    Log.d(TAG, "doInBackground: query: " + query);
+
+                    // Write POST data.
+                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
+                    BufferedWriter bufferedWriter = new BufferedWriter(
+                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
+                    bufferedWriter.write(query);
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+
+                    // Retrieve the response.
+                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+
+                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
+
+                    switch (stringBuilder.toString()) {
+                        case CANCEL_ERROR:
+                            showInternalError(reference.getString(R.string.requests_order_cancel_failed));
+                            break;
+                        case CANCEL_NOT_ALLOWED:
+                            showInternalError(reference.getString(R.string.not_allowed_error));
+                            break;
+                        default:
+                            showNoOrders();
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(reference, reference.getString(R.string.requests_order_cancel_success), Toast.LENGTH_LONG).show();
+                                }
+                            });
                     }
 
                     Log.d(TAG, "doInBackground: stringBuilder: " + stringBuilder.toString());

@@ -68,6 +68,28 @@
                     android:textSize="15sp"
                     android:visibility="gone" />
 
+                <com.balysv.materialripple.MaterialRippleLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/requests_order_status"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="@dimen/activity_vertical_margin_info"
+                    app:mrl_rippleColor="@color/white"
+                    app:mrl_rippleOverlay="true">
+
+                    <Button
+                        android:id="@+id/requests_order_cancel"
+                        android:layout_width="150sp"
+                        android:layout_height="@dimen/login_button_height"
+                        android:background="@color/colorAccent"
+                        android:gravity="center_vertical"
+                        android:text="@string/action_request_cancel"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:visibility="gone" />
+                </com.balysv.materialripple.MaterialRippleLayout>
+
                 <ProgressBar
                     android:id="@+id/requests_order_progress"
                     style="@style/Widget.AppCompat.ProgressBar.Horizontal"

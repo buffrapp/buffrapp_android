@@ -21,6 +21,7 @@
     <string name="request_getUserHistory" translatable="false">getUserHistory</string>
     <string name="request_makeOrder" translatable="false">makeOrder</string>
     <string name="request_getUserOrders" translatable="false">getUserOrders</string>
+    <string name="request_cancelOrder" translatable="false">cancelOrder</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
     <string name="key_last_order" translatable="false">last_order</string>
@@ -91,7 +92,11 @@
     <string name="requests_order_cancelled">We\'re sorry, but your order has been cancelled, \nplease try again later.</string>
     <string name="requests_orders_empty">Nothing here, go ahead, order something!</string>
     <string name="requests_order_status">Your order</string>
-    <string name="requests_order_status_description">Here, you\'ll be able to see the progres of your order.</string>
+    <string name="requests_order_status_description">Here, you\'ll be able to see the progress of your order.</string>
+    <string name="action_request_cancel">Cancel order</string>
+    <string name="requests_order_cancel_confirmation">Do you really want to cancel your order of %s?</string>
+    <string name="requests_order_cancel_success">Your order has been cancelled.</string>
+    <string name="requests_order_cancel_failed">There was a problem cancelling your order, please try again.</string>
 
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>
