@@ -77,6 +77,13 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
                 holder.orderDeliveredTextView.setText(String.format(holder.itemView.getContext().getString(R.string.order_delivered), jsonObject.getString("FH_Entregado")));
             } else {
                 Log.d(TAG, "onBindViewHolder: the order was cancelled.");
+                if (jsonObject.getString("DNI_Cancelado").equals(jsonObject.getString("DNI_Usuario"))) {
+                    holder.orderHolderTextView.setVisibility(View.GONE);
+                    holder.orderCancelledTextView.setText(holder.itemView.getContext().getString(R.string.order_cancelled_user));
+                } else {
+                    holder.orderCancelledTextView.setText(holder.itemView.getContext().getString(R.string.order_cancelled));
+                }
+
                 holder.orderTakenTextView.setVisibility(View.GONE);
                 holder.orderReadyTextView.setVisibility(View.GONE);
                 holder.orderDeliveredTextView.setVisibility(View.GONE);
