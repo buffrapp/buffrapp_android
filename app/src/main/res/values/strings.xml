@@ -24,6 +24,7 @@
     <string name="request_cancelOrder" translatable="false">cancelOrder</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
+    <string name="key_session_user_name" translatable="false">session_user_name</string>
     <string name="key_last_order" translatable="false">last_order</string>
     <string name="key_first_delivery" translatable="false">first_delivery</string>
     <string name="key_first_run_products" translatable="false">first_run_products</string>
@@ -36,6 +37,7 @@
     <string name="product_price" translatable="false">$ %s</string>
     <string name="internal_error">Unable to handle this request properly.</string>
     <string name="not_allowed_error">You\'re not allowed to do that, please logout and sign in again.</string>
+    <string name="unknown_user">Unknown user</string>
 
     <!-- Strings related to login -->
     <string name="welcome">"Hi!\n\nTo keep going, log in."</string>

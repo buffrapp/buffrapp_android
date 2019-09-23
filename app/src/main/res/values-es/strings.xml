@@ -76,4 +76,5 @@
     <string name="requests_order_cancel_failed">Hubo un problema al cancelar tu orden, por favor intentálo otra vez.</string>
     <string name="requests_order_cancel_success">Tu orden fue cancelada.</string>
     <string name="order_cancelled_user">Cancelaste el pedido.</string>
+    <string name="unknown_user">Usuario desconocido</string>
 </resources>

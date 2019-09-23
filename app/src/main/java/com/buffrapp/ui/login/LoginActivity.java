@@ -33,6 +33,7 @@ import com.buffrapp.MainActivity;
 import com.buffrapp.R;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.json.JSONArray;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -206,11 +207,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
-        private static final int LOGIN_PASS = 0;
-        private static final int LOGIN_ERROR = 1;
-        private static final int LOGIN_BAD_CREDENTIALS = 3;
+        private static final String LOGIN_ERROR = "1";
+        private static final String LOGIN_BAD_CREDENTIALS = "3";
         private WeakReference<LoginActivity> loginActivity;
-        private int response = -1;
+        private String response = null;
 
         NetworkWorker(LoginActivity loginActivity) {
             this.loginActivity = new WeakReference<>(loginActivity);
@@ -275,32 +275,15 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "doInBackground: " + session_id);
                     InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
+                    final StringBuilder stringBuilder = new StringBuilder();
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
                         stringBuilder.append(line);
                     }
 
-                    response = -1;
-                    try {
-                        response = Integer.valueOf(stringBuilder.toString());
-                    } catch (NumberFormatException numberFormatException) {
-                        numberFormatException.printStackTrace();
-                    }
+                    response = stringBuilder.toString();
 
                     switch (response) {
-                        case LOGIN_PASS:
-                            reference.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(reference);
-                                    SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-
-                                    sharedPreferencesEditor.putString(reference.getString(R.string.key_session_id), session_id);
-                                    sharedPreferencesEditor.apply();
-                                }
-                            });
-                            break;
                         case LOGIN_ERROR:
                             reference.runOnUiThread(new Runnable() {
                                 @Override
@@ -318,6 +301,21 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             });
                             break;
+                        default:
+                            JSONArray jsonArray = new JSONArray(response);
+                            final String userName = jsonArray.getString(0);
+
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(reference);
+                                    SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+
+                                    sharedPreferencesEditor.putString(reference.getString(R.string.key_session_id), session_id);
+                                    sharedPreferencesEditor.putString(reference.getString(R.string.key_session_user_name), userName);
+                                    sharedPreferencesEditor.apply();
+                                }
+                            });
                     }
 
                     Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
@@ -332,7 +330,7 @@ public class LoginActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            if (response != LOGIN_PASS) {
+            if (response == LOGIN_ERROR || response == LOGIN_BAD_CREDENTIALS) {
                 reference.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -343,7 +341,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-                if (response < LOGIN_BAD_CREDENTIALS) {
+                if (response == LOGIN_ERROR || response == null) {
                     reference.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -361,7 +359,7 @@ public class LoginActivity extends AppCompatActivity {
 
             final LoginActivity reference = loginActivity.get();
 
-            if (response == LOGIN_PASS) {
+            if (response != LOGIN_ERROR && response != LOGIN_BAD_CREDENTIALS) {
                 reference.updateUiWithUser();
             }
         }

@@ -281,11 +281,7 @@ public class Products extends AppCompatActivity
         getMenuInflater().inflate(R.menu.main, menu);
 
         TextView textViewNavInfo = findViewById(R.id.textViewNavInfo);
-        try {
-            textViewNavInfo.setText(String.format(getString(R.string.version), String.valueOf(getApplicationContext().getPackageManager().getPackageInfo(getPackageName(), 0).versionName)));
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "onCreate: failed to fetch app version code.", e);
-        }
+        textViewNavInfo.setText(PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_session_user_name), getString(R.string.unknown_user)));
         return true;
     }
 
