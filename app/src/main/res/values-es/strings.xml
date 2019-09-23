@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BuffRApp</string>
-    <string name="action_settings">Configuraciones</string>
     <string name="action_sign_in">Iniciar sesión</string>
     <string name="action_sign_in_short">Iniciá sesión</string>
     <string name="invalid_password">La contraseña debe tener 5 carácteres o más.</string>
@@ -77,4 +76,5 @@
     <string name="requests_order_cancel_success">Tu orden fue cancelada.</string>
     <string name="order_cancelled_user">Cancelaste el pedido.</string>
     <string name="unknown_user">Usuario desconocido</string>
+    <string name="action_report">Reportar un problema</string>
 </resources>

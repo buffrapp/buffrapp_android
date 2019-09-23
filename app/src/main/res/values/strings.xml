@@ -38,6 +38,7 @@
     <string name="internal_error">Unable to handle this request properly.</string>
     <string name="not_allowed_error">You\'re not allowed to do that, please logout and sign in again.</string>
     <string name="unknown_user">Unknown user</string>
+    <string name="action_report">Report a problem</string>
 
     <!-- Strings related to login -->
     <string name="welcome">"Hi!\n\nTo keep going, log in."</string>
@@ -57,7 +58,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
     <string name="request_malformedurl">There\'s been an unexpected exception while fetching the data.</string>
     <string name="no_products">Nothing here, \nwould you like to try reloading?</string>
     <string name="products_error">There was a problem, \nwould you like to try again?</string>
