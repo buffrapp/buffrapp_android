@@ -362,6 +362,7 @@ public class Requests extends AppCompatActivity
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
+                    TextView errorExtraTextView = reference.findViewById(R.id.tv_error_extra);
 
                     ImageView emptyImageView = reference.findViewById(R.id.ic_empty);
                     TextView emptyTextView = reference.findViewById(R.id.tv_empty);
@@ -373,6 +374,7 @@ public class Requests extends AppCompatActivity
 
                     errorImageView.setVisibility(View.GONE);
                     errorTextView.setVisibility(View.GONE);
+                    errorExtraTextView.setVisibility(View.GONE);
 
                     emptyImageView.setVisibility(View.VISIBLE);
                     emptyTextView.setVisibility(View.VISIBLE);
