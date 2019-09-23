@@ -1,10 +1,9 @@
 package com.buffrapp.ui.login;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
+import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.SSLCertificateSocketFactory;
 import android.net.Uri;
@@ -15,13 +14,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -58,13 +58,49 @@ public class LoginActivity extends AppCompatActivity {
     private static final String SYMBOL_AMPERSAND_ENCODED = "%26";
 
     private LoginViewModel loginViewModel;
-    private VideoView videoView;
+    private TextureView textureView;
+    private MediaPlayer mediaPlayer;
     private Button loginButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        textureView = findViewById(R.id.video);
+        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                try {
+                    mediaPlayer = MediaPlayer.create(LoginActivity.this, R.raw.login_background);
+                    mediaPlayer.setSurface(new Surface(surface));
+                    mediaPlayer.setLooping(true);
+                    mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+                    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            mediaPlayer.start();
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.d(TAG, "onSurfaceTextureAvailable: failed to start background video playback.");
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+            }
+        });
 
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
@@ -139,29 +175,21 @@ public class LoginActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
-        Resources resources = this.getResources();
-        videoView = findViewById(R.id.video);
-        Uri uri = new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(resources.getResourcePackageName(R.raw.login_background))
-                .appendPath(resources.getResourceTypeName(R.raw.login_background))
-                .appendPath(resources.getResourceEntryName(R.raw.login_background))
-                .build();
-        videoView.setVideoURI(uri);
-        videoView.start();
-        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                videoView.start();
-            }
-        });
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
+    }
 
-        videoView.start();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
     }
 
     public void loginButtonHandler(View view) {
