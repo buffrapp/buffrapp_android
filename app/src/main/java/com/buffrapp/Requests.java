@@ -69,8 +69,9 @@ public class Requests extends AppCompatActivity
 
     private static final String TAG = "Requests";
 
-    private static boolean shouldHoldDeliveryView;
-    private static boolean shouldRunBackgroundWorkerOnStop;
+    private boolean shouldHoldDeliveryView;
+    private boolean shouldRunBackgroundWorkerOnStop;
+    private boolean shouldTryToUpdate;
     private boolean firstDelivery;
     private boolean shouldDisplayConfetti;
 
@@ -175,7 +176,12 @@ public class Requests extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        new NetworkWorker(Requests.this).execute();
+                        if (shouldTryToUpdate) {
+                            new NetworkWorker(Requests.this).execute();
+                        } else {
+                            timer.cancel();
+                            timer.purge();
+                        }
                     }
                 });
             }
@@ -185,6 +191,7 @@ public class Requests extends AppCompatActivity
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         firstDelivery = sharedPreferences.getBoolean(getString(R.string.key_first_delivery), true);
         shouldDisplayConfetti = true;
+        shouldTryToUpdate = true;
 
         if (sharedPreferences.getBoolean(getString(R.string.key_first_run_requests), true)) {
             getWindow().getDecorView().post(new Runnable() {
@@ -412,6 +419,8 @@ public class Requests extends AppCompatActivity
 
                     emptyImageView.setVisibility(View.VISIBLE);
                     emptyTextView.setVisibility(View.VISIBLE);
+
+                    reference.shouldTryToUpdate = false;
                 }
             });
         }
@@ -500,7 +509,7 @@ public class Requests extends AppCompatActivity
                 editor.putInt(reference.getString(R.string.key_last_order), orderID);
                 editor.apply();
 
-                shouldHoldDeliveryView = true;
+                reference.shouldHoldDeliveryView = true;
             }
         }
 
@@ -582,7 +591,7 @@ public class Requests extends AppCompatActivity
                                 int last_id = sharedPreferences.getInt(reference.getString(R.string.key_last_order), reference.getResources().getInteger(R.integer.order_id_default));
                                 Log.d(TAG, "doInBackground: last_id: " + last_id);
 
-                                if (last_id == order.getInt("ID_Pedido") && !shouldHoldDeliveryView) {
+                                if (last_id == order.getInt("ID_Pedido") && !reference.shouldHoldDeliveryView) {
                                     Log.d(TAG, "doInBackground: last_id matches remote, showing no orders layout.");
                                     showNoOrders();
                                 } else {
@@ -695,7 +704,7 @@ public class Requests extends AppCompatActivity
                                         });
                                     }
 
-                                    shouldRunBackgroundWorkerOnStop = true;
+                                    reference.shouldRunBackgroundWorkerOnStop = true;
                                     showDataFields();
                                 }
                             } else {
@@ -795,6 +804,8 @@ public class Requests extends AppCompatActivity
 
                     emptyImageView.setVisibility(View.VISIBLE);
                     emptyTextView.setVisibility(View.VISIBLE);
+
+                    reference.shouldTryToUpdate = false;
                 }
             });
         }
