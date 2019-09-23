@@ -27,15 +27,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
             } else {
-                Intent orderStatusLooperIntent = new Intent(this, OrderStatusLooper.class);
-                stopService(orderStatusLooperIntent);
-
-                try {
-                    startService(orderStatusLooperIntent);
-                } catch (IllegalStateException e) {
-                    e.printStackTrace();
-                }
-
                 Log.d(TAG, "onCreate: session ID found, it was \"" + session_id + "\", loading Products...");
                 Intent intent = new Intent(this, Products.class);
                 startActivity(intent);

@@ -91,6 +91,16 @@ public class Products extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent orderStatusLooperIntent = new Intent(this, OrderStatusLooper.class);
+        stopService(orderStatusLooperIntent);
+
+        try {
+            startService(orderStatusLooperIntent);
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+
         setContentView(R.layout.activity_products);
 
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
@@ -555,6 +565,7 @@ public class Products extends AppCompatActivity
                                     Toast.makeText(reference, reference.getString(R.string.order_success), Toast.LENGTH_LONG).show();
 
                                     Intent intent = new Intent(reference, OrderStatusLooper.class);
+                                    reference.stopService(intent);
                                     reference.startService(intent);
                                 }
                             });

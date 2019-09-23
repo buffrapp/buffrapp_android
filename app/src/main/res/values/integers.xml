@@ -2,6 +2,6 @@
 <resources>
     <integer name="notification_id">4096</integer> <!-- Just because I love this number. -->
     <integer name="order_id_default">-1</integer>
-    <integer name="update_interval">5000</integer> <!-- ms -->
+    <integer name="update_interval">2000</integer> <!-- ms -->
     <integer name="connection_timeout">5000</integer> <!-- ms -->
 </resources>

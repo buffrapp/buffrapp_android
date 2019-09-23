@@ -175,7 +175,6 @@ public class Requests extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        swipeRefreshLayout.setRefreshing(true);
                         new NetworkWorker(Requests.this).execute();
                     }
                 });
