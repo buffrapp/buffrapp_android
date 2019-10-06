@@ -330,7 +330,7 @@ public class LoginActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            if (response == LOGIN_ERROR || response == LOGIN_BAD_CREDENTIALS) {
+            if (response.equals(LOGIN_ERROR) || response.equals(LOGIN_BAD_CREDENTIALS)) {
                 reference.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -341,7 +341,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-                if (response == LOGIN_ERROR || response == null) {
+                if (response.equals(LOGIN_ERROR) || response == null) {
                     reference.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
