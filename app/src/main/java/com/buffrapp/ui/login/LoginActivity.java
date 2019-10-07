@@ -314,6 +314,8 @@ public class LoginActivity extends AppCompatActivity {
                                     sharedPreferencesEditor.putString(reference.getString(R.string.key_session_id), session_id);
                                     sharedPreferencesEditor.putString(reference.getString(R.string.key_session_user_name), userName);
                                     sharedPreferencesEditor.apply();
+
+                                    reference.updateUiWithUser();
                                 }
                             });
                     }
@@ -356,12 +358,6 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-
-            final LoginActivity reference = loginActivity.get();
-
-            if (response != LOGIN_ERROR && response != LOGIN_BAD_CREDENTIALS) {
-                reference.updateUiWithUser();
-            }
         }
     }
 
