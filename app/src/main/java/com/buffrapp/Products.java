@@ -3,7 +3,6 @@ package com.buffrapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.SSLCertificateSocketFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -119,7 +118,7 @@ public class Products extends AppCompatActivity
         navigationView.setCheckedItem(R.id.nav_products);
         navigationView.bringToFront();
 
-        recyclerView = findViewById(R.id.rv_products);
+        recyclerView = findViewById(R.id.rvProducts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         productsAdapter = new ProductsAdapter(this, null);
@@ -373,9 +372,9 @@ public class Products extends AppCompatActivity
                             public void run() {
                                 reference.productsAdapter.setNewData(jsonArray);
 
-                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rv_products);
+                                ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
+                                TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
+                                RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
                                 ImageView icError = reference.findViewById(R.id.icError);
                                 TextView tvError = reference.findViewById(R.id.tvError);
                                 TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
@@ -392,9 +391,9 @@ public class Products extends AppCompatActivity
                         reference.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rv_products);
+                                ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
+                                TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
+                                RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
                                 ImageView icError = reference.findViewById(R.id.icError);
                                 TextView tvError = reference.findViewById(R.id.tvError);
                                 TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
