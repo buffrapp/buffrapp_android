@@ -21,8 +21,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.buffrapp.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
@@ -50,14 +48,14 @@ import javax.net.ssl.HttpsURLConnection;
 public class Profile extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String TAG = "History";
+    private static final String TAG = "Profile";
 
     private int navCurrentId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_history);
+        setContentView(R.layout.activity_profile);
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -69,35 +67,35 @@ public class Profile extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setCheckedItem(R.id.nav_history);
+        navigationView.setCheckedItem(R.id.nav_profile);
         navigationView.bringToFront();
 
         new NetworkWorker(this).execute();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sharedPreferences.getBoolean(getString(R.string.key_first_run_history), true)) {
+        if (sharedPreferences.getBoolean(getString(R.string.key_first_run_profile), true)) {
             getWindow().getDecorView().post(new Runnable() {
                 @Override
                 public void run() {
                     float x;
                     float y;
 
-                    x = 200f;
-                    y = toolbar.getY() + 300;
+                    x = (float) navigationView.getWidth() / 2 + 90f;
+                    y = (float) navigationView.getHeight() / 2 - 50f;
 
-                    SimpleTarget rvItemTarget = new SimpleTarget.Builder(Profile.this)
+                    SimpleTarget middleOfViewTarget = new SimpleTarget.Builder(Profile.this)
                             .setPoint(x, y)
-                            .setShape(new Circle(250f))
-                            .setTitle(getString(R.string.history_review))
-                            .setDescription(getString(R.string.history_review_description))
-                            .setOverlayPoint(x + 150f, y + 250f)
+                            .setShape(new Circle(350f))
+                            .setTitle(getString(R.string.profile_review))
+                            .setDescription(getString(R.string.profile_review_description))
+                            .setOverlayPoint(x - 325f, y + 400f)
                             .build();
 
                     Spotlight spotlight = Spotlight.with(Profile.this)
                             .setOverlayColor(R.color.background)
                             .setDuration(100L)
                             .setAnimation(new AccelerateDecelerateInterpolator())
-                            .setTargets(rvItemTarget)
+                            .setTargets(middleOfViewTarget)
                             .setClosedOnTouchedOutside(true);
 
                     spotlight.start();
@@ -105,7 +103,7 @@ public class Profile extends AppCompatActivity
             });
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(getString(R.string.key_first_run_history), false);
+            editor.putBoolean(getString(R.string.key_first_run_profile), false);
             editor.apply();
         }
 
@@ -125,7 +123,7 @@ public class Profile extends AppCompatActivity
             @SuppressWarnings("ConstantConditions")
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
-                if (navCurrentId != R.id.nav_history) {
+                if (navCurrentId != R.id.nav_profile) {
                     // Handle navigation view item clicks here.
                     if (navCurrentId < 0) {
                         Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
@@ -209,49 +207,14 @@ public class Profile extends AppCompatActivity
             reference.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ImageView icNoHistory = reference.findViewById(R.id.icEmptyHistory);
-                    TextView tvNoHistory = reference.findViewById(R.id.tvEmptyHistory);
-                    RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
                     ImageView icError = reference.findViewById(R.id.icError);
                     TextView tvError = reference.findViewById(R.id.tvError);
                     TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
 
-                    icNoHistory.setVisibility(View.GONE);
-                    tvNoHistory.setVisibility(View.GONE);
                     icError.setVisibility(View.VISIBLE);
                     tvError.setVisibility(View.VISIBLE);
                     tvErrorExtra.setVisibility(View.VISIBLE);
                     tvErrorExtra.setText(message);
-                    recyclerView.setVisibility(View.GONE);
-                }
-            });
-        }
-
-        private void showNoHistory() {
-            Log.d(TAG, "doInBackground: no ongoing orders found.");
-            final Profile reference = profileActivity.get();
-
-            if (profileActivity == null) {
-                Log.d(TAG, "doInBackground: showNoOrders: failed to get a reference.");
-                return;
-            }
-
-            reference.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ImageView icNoHistory = reference.findViewById(R.id.icEmptyHistory);
-                    TextView tvNoHistory = reference.findViewById(R.id.tvEmptyHistory);
-                    RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
-                    ImageView icError = reference.findViewById(R.id.icError);
-                    TextView tvError = reference.findViewById(R.id.tvError);
-                    TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
-
-                    icNoHistory.setVisibility(View.VISIBLE);
-                    tvNoHistory.setVisibility(View.VISIBLE);
-                    icError.setVisibility(View.VISIBLE);
-                    tvError.setVisibility(View.VISIBLE);
-                    tvErrorExtra.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.GONE);
                 }
             });
         }
@@ -287,7 +250,7 @@ public class Profile extends AppCompatActivity
                     httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
 
                     Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getUserHistory));
+                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getUserProfile));
 
                     String query = builder.build().getEncodedQuery();
                     Log.d(TAG, "doInBackground: query: " + query);
@@ -319,7 +282,7 @@ public class Profile extends AppCompatActivity
                             showInternalError(reference.getString(R.string.not_allowed_error));
                             break;
                         case HISTORY_EMPTY_RESULT:
-                            showNoHistory();
+                            showInternalError(reference.getString(R.string.profile_load_failed));
                             break;
                         default:
                             final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
@@ -330,21 +293,15 @@ public class Profile extends AppCompatActivity
                                 reference.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
-                                        TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
-                                        RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
                                         ImageView icError = reference.findViewById(R.id.icError);
                                         TextView tvError = reference.findViewById(R.id.tvError);
 
-                                        icNoProducts.setVisibility(View.GONE);
-                                        tvNoProducts.setVisibility(View.GONE);
                                         icError.setVisibility(View.GONE);
                                         tvError.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.VISIBLE);
                                     }
                                 });
                             } else {
-                                showNoHistory();
+                                showInternalError(reference.getString(R.string.profile_load_failed));
                             }
                     }
                 } catch (Exception e) {
@@ -365,13 +322,6 @@ public class Profile extends AppCompatActivity
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-
-            Profile reference = profileActivity.get();
-
-            if (profileActivity != null) {
-                SwipeRefreshLayout swipeRefreshLayout = reference.findViewById(R.id.swipeRefreshLayout);
-                swipeRefreshLayout.setRefreshing(false);
-            }
         }
     }
 }

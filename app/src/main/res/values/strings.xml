@@ -22,6 +22,7 @@
     <string name="request_makeOrder" translatable="false">makeOrder</string>
     <string name="request_getUserOrders" translatable="false">getUserOrders</string>
     <string name="request_cancelOrder" translatable="false">cancelOrder</string>
+    <string name="request_getUserProfile" translatable="false">getUserProfile</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
     <string name="key_session_user_name" translatable="false">session_user_name</string>
@@ -30,6 +31,7 @@
     <string name="key_first_run_products" translatable="false">first_run_products</string>
     <string name="key_first_run_requests" translatable="false">first_run_requests</string>
     <string name="key_first_run_history" translatable="false">first_run_history</string>
+    <string name="key_first_run_profile" translatable="false">first_run_profile</string>
 
     <!-- Misc -->
     <string name="dialog_yes">Yes</string>
@@ -101,6 +103,11 @@
     <string name="requests_order_cancel_success">Your order has been cancelled.</string>
     <string name="requests_order_cancel_failed">There was a problem cancelling your order, please try again.</string>
 
+    <!-- Profile -->
+    <string name="profile_review">Your profile</string>
+    <string name="profile_review_description">Review, manage or delete your account.</string>
+    <string name="profile_load_failed">It seems like there\'s a problem with your profile, \nplease contact us.</string>
+
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>
     <string name="menu_slideshow">Slideshow</string>
@@ -113,7 +120,7 @@
     <string name="menu_logout">Logout</string>
     <string name="title_activity_requests">Requests</string>
     <string name="title_activity_history">History</string>
+    <string name="title_activity_profile">Profile</string>
 
     <string name="menu_home">Home</string>
-    <string name="title_activity_profile">Profile</string>
 </resources>

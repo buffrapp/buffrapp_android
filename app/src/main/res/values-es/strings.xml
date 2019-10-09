@@ -77,4 +77,7 @@
     <string name="order_cancelled_user">Cancelaste el pedido.</string>
     <string name="unknown_user">Usuario desconocido</string>
     <string name="action_report">Reportar un problema</string>
+    <string name="profile_review">Tu perfil</string>
+    <string name="profile_review_description">Revisá, administrá o eliminá tu cuenta.</string>
+    <string name="profile_load_failed">Parece que hay un problema con tu perfil, \npor favor contactános.</string>
 </resources>
