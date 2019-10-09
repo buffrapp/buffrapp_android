@@ -107,6 +107,9 @@
     <string name="profile_review">Your profile</string>
     <string name="profile_review_description">Review, manage or delete your account.</string>
     <string name="profile_load_failed">It seems like there\'s a problem with your profile, \nplease contact us.</string>
+    <string name="profile_dni_not_allowed">You can\'t change your DNI.</string>
+    <string name="action_profile_send_update">Update</string>
+    <string name="profile_password">Password</string>
 
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>

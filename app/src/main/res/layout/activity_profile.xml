@@ -26,7 +26,111 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="@dimen/activity_vertical_padding_top_small">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true" />
+
+        <ImageView
+            android:id="@+id/icProfile"
+            android:layout_width="match_parent"
+            android:layout_height="200sp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:contentDescription="@string/products_error"
+            android:src="@drawable/ic_layout_profile"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/etDNI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/icProfile"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusable="false"
+            android:inputType="none"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/etMailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etDNI"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusable="false"
+            android:inputType="none"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etMailAddress"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusable="false"
+            android:hint="@string/profile_password"
+            android:inputType="textPassword"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/etFullName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etPassword"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusable="false"
+            android:inputType="none"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/etCourse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etFullName"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusable="false"
+            android:inputType="none"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/etDivision"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etCourse"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusable="false"
+            android:inputType="none"
+            android:visibility="gone" />
+
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etDivision"
+            android:layout_centerInParent="true"
+            app:mrl_rippleColor="@color/white"
+            app:mrl_rippleOverlay="true">
+
+            <Button
+                android:id="@+id/btUpdate"
+                android:layout_width="150sp"
+                android:layout_height="@dimen/login_button_height"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:background="@color/colorAccent"
+                android:text="@string/action_profile_send_update"
+                android:textColor="@color/white"
+                android:visibility="gone" />
+        </com.balysv.materialripple.MaterialRippleLayout>
 
         <ImageView
             android:id="@+id/icError"

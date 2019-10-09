@@ -12,8 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -29,7 +33,8 @@ import com.takusemba.spotlight.shape.Circle;
 import com.takusemba.spotlight.target.SimpleTarget;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -69,6 +74,14 @@ public class Profile extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_profile);
         navigationView.bringToFront();
+
+        EditText etDNI = findViewById(R.id.etDNI);
+        etDNI.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(Profile.this, getString(R.string.profile_dni_not_allowed), Toast.LENGTH_LONG).show();
+            }
+        });
 
         new NetworkWorker(this).execute();
 
@@ -186,9 +199,9 @@ public class Profile extends AppCompatActivity
     }
 
     private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
-        private static final String HISTORY_ERROR = "1";
-        private static final String HISTORY_NOT_ALLOWED = "2";
-        private static final String HISTORY_EMPTY_RESULT = "3";
+        private static final String PROFILE_ERROR = "1";
+        private static final String PROFILE_NOT_ALLOWED = "2";
+        private static final String PROFILE_NOT_ENOUGH_FIELDS = "3";
         private WeakReference<Profile> profileActivity;
 
         NetworkWorker(Profile profileActivity) {
@@ -210,7 +223,25 @@ public class Profile extends AppCompatActivity
                     ImageView icError = reference.findViewById(R.id.icError);
                     TextView tvError = reference.findViewById(R.id.tvError);
                     TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
+                    TextView etDNI = reference.findViewById(R.id.etDNI);
+                    TextView etMailAddress = reference.findViewById(R.id.etMailAddress);
+                    TextView etPassword = reference.findViewById(R.id.etPassword);
+                    TextView etFullName = reference.findViewById(R.id.etFullName);
+                    TextView etCourse = reference.findViewById(R.id.etCourse);
+                    TextView etDivision = reference.findViewById(R.id.etDivision);
+                    ProgressBar progressBar = reference.findViewById(R.id.progressBar);
+                    ImageView icProfile = reference.findViewById(R.id.icProfile);
+                    Button btUpdate = reference.findViewById(R.id.btUpdate);
 
+                    progressBar.setVisibility(View.GONE);
+                    icProfile.setVisibility(View.GONE);
+                    etDNI.setVisibility(View.GONE);
+                    etMailAddress.setVisibility(View.GONE);
+                    etPassword.setVisibility(View.GONE);
+                    etFullName.setVisibility(View.GONE);
+                    etCourse.setVisibility(View.GONE);
+                    etDivision.setVisibility(View.GONE);
+                    btUpdate.setVisibility(View.GONE);
                     icError.setVisibility(View.VISIBLE);
                     tvError.setVisibility(View.VISIBLE);
                     tvErrorExtra.setVisibility(View.VISIBLE);
@@ -275,29 +306,60 @@ public class Profile extends AppCompatActivity
                     Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
 
                     switch (stringBuilder.toString()) {
-                        case HISTORY_ERROR:
+                        case PROFILE_ERROR:
                             showInternalError(reference.getString(R.string.internal_error));
                             break;
-                        case HISTORY_NOT_ALLOWED:
+                        case PROFILE_NOT_ALLOWED:
                             showInternalError(reference.getString(R.string.not_allowed_error));
                             break;
-                        case HISTORY_EMPTY_RESULT:
+                        case PROFILE_NOT_ENOUGH_FIELDS:
                             showInternalError(reference.getString(R.string.profile_load_failed));
                             break;
                         default:
-                            final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                            final JSONObject jsonObject = new JSONObject(stringBuilder.toString());
 
-                            if (jsonArray.length() > 0) {
-                                Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
+                            if (jsonObject.length() > 0) {
+                                Log.d(TAG, "doInBackground: jsonObject: " + jsonObject.toString());
 
                                 reference.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         ImageView icError = reference.findViewById(R.id.icError);
                                         TextView tvError = reference.findViewById(R.id.tvError);
+                                        ProgressBar progressBar = reference.findViewById(R.id.progressBar);
+                                        ImageView icProfile = reference.findViewById(R.id.icProfile);
+                                        TextView etDNI = reference.findViewById(R.id.etDNI);
+                                        TextView etMailAddress = reference.findViewById(R.id.etMailAddress);
+                                        TextView etPassword = reference.findViewById(R.id.etPassword);
+                                        TextView etFullName = reference.findViewById(R.id.etFullName);
+                                        TextView etCourse = reference.findViewById(R.id.etCourse);
+                                        TextView etDivision = reference.findViewById(R.id.etDivision);
+                                        Button btUpdate = reference.findViewById(R.id.btUpdate);
 
                                         icError.setVisibility(View.GONE);
                                         tvError.setVisibility(View.GONE);
+                                        progressBar.setVisibility(View.GONE);
+                                        icProfile.setVisibility(View.VISIBLE);
+                                        etDNI.setVisibility(View.VISIBLE);
+                                        etMailAddress.setVisibility(View.VISIBLE);
+                                        etPassword.setVisibility(View.VISIBLE);
+                                        etFullName.setVisibility(View.VISIBLE);
+                                        etCourse.setVisibility(View.VISIBLE);
+                                        etDivision.setVisibility(View.VISIBLE);
+                                        btUpdate.setVisibility(View.VISIBLE);
+
+                                        try {
+                                            etDNI.setText(jsonObject.getString("DNI"));
+                                            etMailAddress.setText(jsonObject.getString("E-Mail"));
+                                            // etPassword.setText(jsonObject.getString("Password"));
+                                            etFullName.setText(jsonObject.getString("Nombre"));
+                                            etCourse.setText(jsonObject.getString("Curso"));
+                                            etDivision.setText(jsonObject.getString("Division"));
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+
+                                            showInternalError(reference.getString(R.string.profile_load_failed));
+                                        }
                                     }
                                 });
                             } else {

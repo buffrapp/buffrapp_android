@@ -80,4 +80,7 @@
     <string name="profile_review">Tu perfil</string>
     <string name="profile_review_description">Revisá, administrá o eliminá tu cuenta.</string>
     <string name="profile_load_failed">Parece que hay un problema con tu perfil, \npor favor contactános.</string>
+    <string name="profile_dni_not_allowed">No podés cambiar tu DNI.</string>
+    <string name="action_profile_send_update">Actualizar</string>
+    <string name="profile_password">Contraseña</string>
 </resources>
