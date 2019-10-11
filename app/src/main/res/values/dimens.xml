@@ -8,6 +8,8 @@
 
     <!-- Custom dimensions -->
     <dimen name="login_button_height">40sp</dimen>
+    <dimen name="profile_challenge_input">50sp</dimen>
+    <dimen name="profile_challenge_horizontal_padding">32dp</dimen>
     <dimen name="activity_vertical_margin_brand">80dp</dimen>
     <dimen name="activity_vertical_padding_top">56dp</dimen>
     <dimen name="activity_vertical_padding_top_small">32dp</dimen>
@@ -16,5 +18,5 @@
     <dimen name="drawable_padding">4dp</dimen>
     <dimen name="icon_margin_unwrapped">2dp</dimen>
     <dimen name="progressbar_padding">16dp</dimen>
-    <dimen name="icon_width">24dp</dimen>
+    <dimen name="icon_square_size">24dp</dimen>
 </resources>

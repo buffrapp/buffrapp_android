@@ -1,5 +1,6 @@
 package com.buffrapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.SSLCertificateSocketFactory;
@@ -7,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,10 +19,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -79,6 +84,78 @@ public class Profile extends AppCompatActivity
         etDNI.setKeyListener(null);
         EditText etFullName = findViewById(R.id.etFullName);
         etFullName.setKeyListener(null);
+
+        final Button btUpdate = findViewById(R.id.btUpdate);
+        btUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccentDark));
+                btUpdate.setText(getString(R.string.button_wait));
+                btUpdate.setEnabled(false);
+
+                final TextView etMailAddress = findViewById(R.id.etMailAddress);
+                final TextView etPassword = findViewById(R.id.etPassword);
+                final TextView etCourse = findViewById(R.id.etCourse);
+                final TextView etDivision = findViewById(R.id.etDivision);
+
+                if (etPassword.getText().toString().isEmpty()) {
+                    ProfileUpdateWorker profileUpdateWorker = new ProfileUpdateWorker(Profile.this);
+                    profileUpdateWorker.setMailAddress(etMailAddress.getText().toString());
+                    profileUpdateWorker.setCourse(etCourse.getText().toString());
+                    profileUpdateWorker.setDivision(etDivision.getText().toString());
+                    profileUpdateWorker.execute();
+                } else {
+                    final RelativeLayout rlChallengeAlert = new RelativeLayout(Profile.this);
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                            RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    rlChallengeAlert.setPadding(getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
+                            0,
+                            getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
+                            0);
+
+                    final EditText etCurrentPassword = new EditText(Profile.this);
+                    etCurrentPassword.setHeight(getResources().getDimensionPixelSize(R.dimen.profile_challenge_input));
+                    etCurrentPassword.setHint(getString(R.string.profile_challenge_hint));
+                    etCurrentPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+                    rlChallengeAlert.addView(etCurrentPassword, layoutParams);
+
+                    new AlertDialog.Builder(Profile.this)
+                            .setTitle(getString(R.string.profile_challenge_current_password))
+                            .setView(rlChallengeAlert)
+                            .setPositiveButton(getString(R.string.profile_challenge_action_verify), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ProfileUpdateWorker profileUpdateWorker = new ProfileUpdateWorker(Profile.this);
+                                    profileUpdateWorker.setMailAddress(etMailAddress.getText().toString());
+                                    profileUpdateWorker.setPassword(etPassword.getText().toString());
+                                    profileUpdateWorker.setCourse(etCourse.getText().toString());
+                                    profileUpdateWorker.setDivision(etDivision.getText().toString());
+                                    profileUpdateWorker.setCurrentPassword(etCurrentPassword.getText().toString());
+                                    profileUpdateWorker.execute();
+                                }
+                            })
+                            .setNegativeButton(getString(R.string.profile_challenge_action_cancel), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    btUpdate.setText(getString(R.string.action_profile_send_update));
+                                    btUpdate.setEnabled(true);
+                                    btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                                }
+                            })
+                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialog) {
+                                    btUpdate.setText(getString(R.string.action_profile_send_update));
+                                    btUpdate.setEnabled(true);
+                                    btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
 
         new NetworkWorker(this).execute();
 
@@ -195,10 +272,185 @@ public class Profile extends AppCompatActivity
         return true;
     }
 
-    private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
+
+    private static class ProfileUpdateWorker extends AsyncTask<Void, Void, Void> {
+        private static final String PROFILE_PASS = "0";
         private static final String PROFILE_ERROR = "1";
         private static final String PROFILE_NOT_ALLOWED = "2";
         private static final String PROFILE_NOT_ENOUGH_FIELDS = "3";
+        private static final String PROFILE_INCORRECT_PASSWORD = "4";
+        private static final Character SYMBOL_AMPERSAND = '&';
+        private static final Character SYMBOL_EQUALS = '=';
+        private static final Character SYMBOL_BRACKET_OPEN = '[';
+        private static final Character SYMBOL_BRACKET_CLOSED = ']';
+        private static final String EMPTY_STRING = "";
+        private WeakReference<Profile> profileActivity;
+        private String mailAddress = EMPTY_STRING;
+        private String password = EMPTY_STRING;
+        private String course = EMPTY_STRING;
+        private String division = EMPTY_STRING;
+        private String currentPassword = EMPTY_STRING;
+
+        ProfileUpdateWorker(Profile profileActivity) {
+            this.profileActivity = new WeakReference<>(profileActivity);
+        }
+
+        public void setMailAddress(String nMailAddress) {
+            mailAddress = nMailAddress;
+        }
+
+        public void setPassword(String nPassword) {
+            password = nPassword;
+        }
+
+        public void setCourse(String nCourse) {
+            course = nCourse;
+        }
+
+        public void setDivision(String nDivision) {
+            division = nDivision;
+        }
+
+        public void setCurrentPassword(String nCurrentPassword) {
+            currentPassword = nCurrentPassword;
+        }
+
+        private String getEncodedProfileData(String key, String mailAddress, String password, String course, String division, String currentPassword) {
+            return SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + mailAddress +
+                    SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 1 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + password +
+                    SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 2 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + course +
+                    SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 3 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + division +
+                    SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 4 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + currentPassword;
+        }
+
+        private void showInternalError(final String message) {
+            Log.d(TAG, "doInBackground: an internal error has occurred.");
+            final Profile reference = profileActivity.get();
+
+            if (profileActivity == null) {
+                Log.d(TAG, "doInBackground: showInternalError: failed to get a reference.");
+                return;
+            }
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(reference, message, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            final Profile reference = profileActivity.get();
+
+            if (profileActivity == null) {
+                return null;
+            }
+
+            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
+            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+
+            try {
+                URL url = new URL(preURL);
+                HttpsURLConnection httpsURLConnection = null;
+
+                try {
+                    // Try to open a connection.
+                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
+                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
+
+                    // Set the cookies.
+                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
+                    Log.d(TAG, "doInBackground: cookie: " + cookie);
+                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
+
+                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
+                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+                    Uri.Builder builder = new Uri.Builder()
+                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_setUserProfile));
+
+                    String query = builder.build().getEncodedQuery() + getEncodedProfileData(reference.getString(R.string.server_content_param), mailAddress, password, course, division, currentPassword);
+                    Log.d(TAG, "doInBackground: query: " + query);
+
+                    // Write POST data.
+                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
+                    BufferedWriter bufferedWriter = new BufferedWriter(
+                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
+                    bufferedWriter.write(query);
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+
+                    // Retrieve the response.
+                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+
+                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
+
+                    switch (stringBuilder.toString()) {
+                        case PROFILE_PASS:
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(reference, reference.getString(R.string.profile_update_success), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            break;
+                        case PROFILE_INCORRECT_PASSWORD:
+                            showInternalError(reference.getString(R.string.profile_challenge_failed));
+                            break;
+                        case PROFILE_ERROR:
+                            showInternalError(reference.getString(R.string.internal_error));
+                            break;
+                        case PROFILE_NOT_ALLOWED:
+                            showInternalError(reference.getString(R.string.not_allowed_error));
+                            break;
+                        case PROFILE_NOT_ENOUGH_FIELDS:
+                            showInternalError(reference.getString(R.string.profile_update_failed));
+                            break;
+                    }
+
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Button btUpdate = reference.findViewById(R.id.btUpdate);
+                            btUpdate.setText(reference.getString(R.string.action_profile_send_update));
+                            btUpdate.setEnabled(true);
+                            btUpdate.setBackgroundColor(reference.getResources().getColor(R.color.colorAccent));
+                        }
+                    });
+                } catch (Exception e) {
+                    showInternalError(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
+                    e.printStackTrace();
+                } finally {
+                    if (httpsURLConnection != null) {
+                        httpsURLConnection.disconnect();
+                    }
+                }
+            } catch (final MalformedURLException e) {
+                showInternalError(reference.getString(R.string.products_error_malformed_url));
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
+        private static final String PROFILE_ERROR = "1";
+        private static final String PROFILE_NOT_ALLOWED = "2";
         private WeakReference<Profile> profileActivity;
 
         NetworkWorker(Profile profileActivity) {
@@ -306,9 +558,6 @@ public class Profile extends AppCompatActivity
                             break;
                         case PROFILE_NOT_ALLOWED:
                             showInternalError(reference.getString(R.string.not_allowed_error));
-                            break;
-                        case PROFILE_NOT_ENOUGH_FIELDS:
-                            showInternalError(reference.getString(R.string.profile_update_failed));
                             break;
                         default:
                             final JSONObject jsonObject = new JSONObject(stringBuilder.toString());

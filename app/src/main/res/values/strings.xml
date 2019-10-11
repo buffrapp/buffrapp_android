@@ -23,6 +23,7 @@
     <string name="request_getUserOrders" translatable="false">getUserOrders</string>
     <string name="request_cancelOrder" translatable="false">cancelOrder</string>
     <string name="request_getUserProfile" translatable="false">getUserProfile</string>
+    <string name="request_setUserProfile" translatable="false">setUserProfile</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
     <string name="key_session_user_name" translatable="false">session_user_name</string>
@@ -116,6 +117,12 @@
     <string name="profile_full_name">Full name</string>
     <string name="profile_course">Course</string>
     <string name="profile_division">Division</string>
+    <string name="profile_update_success">Done, your profile has been updated!</string>
+    <string name="profile_challenge_current_password">Security check</string>
+    <string name="profile_challenge_action_verify">Verify</string>
+    <string name="profile_challenge_action_cancel">Cancel</string>
+    <string name="profile_challenge_failed">That\'s not the right password, please try again.</string>
+    <string name="profile_challenge_hint">Type your current password</string>
 
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>

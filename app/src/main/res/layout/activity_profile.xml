@@ -115,7 +115,7 @@
             android:visibility="gone">
 
             <ImageView
-                android:layout_width="@dimen/icon_width"
+                android:layout_width="@dimen/icon_square_size"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="@dimen/icon_margin_unwrapped"
