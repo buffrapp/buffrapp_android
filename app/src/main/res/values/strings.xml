@@ -109,7 +109,12 @@
     <string name="profile_load_failed">It seems like there\'s a problem with your profile, \nplease contact us.</string>
     <string name="profile_dni_not_allowed">You can\'t change your DNI.</string>
     <string name="action_profile_send_update">Update</string>
+    <string name="profile_dni">DNI number</string>
+    <string name="profile_mail_address">Mail address</string>
     <string name="profile_password">Password</string>
+    <string name="profile_full_name">Full name</string>
+    <string name="profile_course">Course</string>
+    <string name="profile_division">Division</string>
 
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>

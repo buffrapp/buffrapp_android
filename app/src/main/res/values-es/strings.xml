@@ -83,4 +83,9 @@
     <string name="profile_dni_not_allowed">No podés cambiar tu DNI.</string>
     <string name="action_profile_send_update">Actualizar</string>
     <string name="profile_password">Contraseña</string>
+    <string name="profile_course">Curso</string>
+    <string name="profile_division">División</string>
+    <string name="profile_dni">Número de DNI</string>
+    <string name="profile_full_name">Nombre completo</string>
+    <string name="profile_mail_address">Correo electrónico</string>
 </resources>

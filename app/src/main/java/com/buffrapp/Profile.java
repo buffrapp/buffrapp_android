@@ -15,9 +15,9 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -76,12 +76,9 @@ public class Profile extends AppCompatActivity
         navigationView.bringToFront();
 
         EditText etDNI = findViewById(R.id.etDNI);
-        etDNI.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(Profile.this, getString(R.string.profile_dni_not_allowed), Toast.LENGTH_LONG).show();
-            }
-        });
+        etDNI.setKeyListener(null);
+        EditText etFullName = findViewById(R.id.etFullName);
+        etFullName.setKeyListener(null);
 
         new NetworkWorker(this).execute();
 
@@ -227,8 +224,7 @@ public class Profile extends AppCompatActivity
                     TextView etMailAddress = reference.findViewById(R.id.etMailAddress);
                     TextView etPassword = reference.findViewById(R.id.etPassword);
                     TextView etFullName = reference.findViewById(R.id.etFullName);
-                    TextView etCourse = reference.findViewById(R.id.etCourse);
-                    TextView etDivision = reference.findViewById(R.id.etDivision);
+                    LinearLayout llCourseDivision = reference.findViewById(R.id.llCourseDivision);
                     ProgressBar progressBar = reference.findViewById(R.id.progressBar);
                     ImageView icProfile = reference.findViewById(R.id.icProfile);
                     Button btUpdate = reference.findViewById(R.id.btUpdate);
@@ -239,8 +235,7 @@ public class Profile extends AppCompatActivity
                     etMailAddress.setVisibility(View.GONE);
                     etPassword.setVisibility(View.GONE);
                     etFullName.setVisibility(View.GONE);
-                    etCourse.setVisibility(View.GONE);
-                    etDivision.setVisibility(View.GONE);
+                    llCourseDivision.setVisibility(View.GONE);
                     btUpdate.setVisibility(View.GONE);
                     icError.setVisibility(View.VISIBLE);
                     tvError.setVisibility(View.VISIBLE);
@@ -334,6 +329,7 @@ public class Profile extends AppCompatActivity
                                         TextView etFullName = reference.findViewById(R.id.etFullName);
                                         TextView etCourse = reference.findViewById(R.id.etCourse);
                                         TextView etDivision = reference.findViewById(R.id.etDivision);
+                                        LinearLayout llCourseDivision = reference.findViewById(R.id.llCourseDivision);
                                         Button btUpdate = reference.findViewById(R.id.btUpdate);
 
                                         icError.setVisibility(View.GONE);
@@ -344,8 +340,7 @@ public class Profile extends AppCompatActivity
                                         etMailAddress.setVisibility(View.VISIBLE);
                                         etPassword.setVisibility(View.VISIBLE);
                                         etFullName.setVisibility(View.VISIBLE);
-                                        etCourse.setVisibility(View.VISIBLE);
-                                        etDivision.setVisibility(View.VISIBLE);
+                                        llCourseDivision.setVisibility(View.VISIBLE);
                                         btUpdate.setVisibility(View.VISIBLE);
 
                                         try {
