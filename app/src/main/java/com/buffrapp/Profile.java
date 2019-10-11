@@ -308,7 +308,7 @@ public class Profile extends AppCompatActivity
                             showInternalError(reference.getString(R.string.not_allowed_error));
                             break;
                         case PROFILE_NOT_ENOUGH_FIELDS:
-                            showInternalError(reference.getString(R.string.profile_load_failed));
+                            showInternalError(reference.getString(R.string.profile_update_failed));
                             break;
                         default:
                             final JSONObject jsonObject = new JSONObject(stringBuilder.toString());
