@@ -8,7 +8,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,13 +61,43 @@ public class Profile extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "Profile";
+    private static final int EMPTY = 0;
 
     private int navCurrentId = -1;
+
+    private EditText etPassword;
+    private EditText etMailAddress;
+    private EditText etCourse;
+    private EditText etDivision;
+
+    private EditText etCurrentPassword;
+    private AlertDialog dialog;
+    private Button btUpdate;
+
+    private RelativeLayout rlChallengeAlert;
+
+    private void resetView() {
+        btUpdate.setText(getString(R.string.action_profile_send_update));
+        btUpdate.setEnabled(true);
+        btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+
+        etPassword.getText().clear();
+    }
+
+    // Password validation check
+    private boolean isPasswordValid(String password) {
+        return password != null && password.trim().length() > 5;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        etMailAddress = findViewById(R.id.etMailAddress);
+        etPassword = findViewById(R.id.etPassword);
+        etCourse = findViewById(R.id.etCourse);
+        etDivision = findViewById(R.id.etDivision);
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -85,77 +117,8 @@ public class Profile extends AppCompatActivity
         EditText etFullName = findViewById(R.id.etFullName);
         etFullName.setKeyListener(null);
 
-        final Button btUpdate = findViewById(R.id.btUpdate);
-        btUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccentDark));
-                btUpdate.setText(getString(R.string.button_wait));
-                btUpdate.setEnabled(false);
-
-                final TextView etMailAddress = findViewById(R.id.etMailAddress);
-                final TextView etPassword = findViewById(R.id.etPassword);
-                final TextView etCourse = findViewById(R.id.etCourse);
-                final TextView etDivision = findViewById(R.id.etDivision);
-
-                if (etPassword.getText().toString().isEmpty()) {
-                    ProfileUpdateWorker profileUpdateWorker = new ProfileUpdateWorker(Profile.this);
-                    profileUpdateWorker.setMailAddress(etMailAddress.getText().toString());
-                    profileUpdateWorker.setCourse(etCourse.getText().toString());
-                    profileUpdateWorker.setDivision(etDivision.getText().toString());
-                    profileUpdateWorker.execute();
-                } else {
-                    final RelativeLayout rlChallengeAlert = new RelativeLayout(Profile.this);
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
-                    );
-                    rlChallengeAlert.setPadding(getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
-                            0,
-                            getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
-                            0);
-
-                    final EditText etCurrentPassword = new EditText(Profile.this);
-                    etCurrentPassword.setHeight(getResources().getDimensionPixelSize(R.dimen.profile_challenge_input));
-                    etCurrentPassword.setHint(getString(R.string.profile_challenge_hint));
-                    etCurrentPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-
-                    rlChallengeAlert.addView(etCurrentPassword, layoutParams);
-
-                    new AlertDialog.Builder(Profile.this)
-                            .setTitle(getString(R.string.profile_challenge_current_password))
-                            .setView(rlChallengeAlert)
-                            .setPositiveButton(getString(R.string.profile_challenge_action_verify), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    ProfileUpdateWorker profileUpdateWorker = new ProfileUpdateWorker(Profile.this);
-                                    profileUpdateWorker.setMailAddress(etMailAddress.getText().toString());
-                                    profileUpdateWorker.setPassword(etPassword.getText().toString());
-                                    profileUpdateWorker.setCourse(etCourse.getText().toString());
-                                    profileUpdateWorker.setDivision(etDivision.getText().toString());
-                                    profileUpdateWorker.setCurrentPassword(etCurrentPassword.getText().toString());
-                                    profileUpdateWorker.execute();
-                                }
-                            })
-                            .setNegativeButton(getString(R.string.profile_challenge_action_cancel), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    btUpdate.setText(getString(R.string.action_profile_send_update));
-                                    btUpdate.setEnabled(true);
-                                    btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-                                }
-                            })
-                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                @Override
-                                public void onDismiss(DialogInterface dialog) {
-                                    btUpdate.setText(getString(R.string.action_profile_send_update));
-                                    btUpdate.setEnabled(true);
-                                    btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-                                }
-                            })
-                            .show();
-                }
-            }
-        });
+        dialog = null;
+        etCurrentPassword = new EditText(Profile.this);
 
         new NetworkWorker(this).execute();
 
@@ -193,6 +156,118 @@ public class Profile extends AppCompatActivity
             editor.putBoolean(getString(R.string.key_first_run_profile), false);
             editor.apply();
         }
+
+        btUpdate = findViewById(R.id.btUpdate);
+        btUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccentDark));
+                btUpdate.setText(getString(R.string.button_wait));
+                btUpdate.setEnabled(false);
+
+                if (etPassword.getText().toString().isEmpty()) {
+                    ProfileUpdateWorker profileUpdateWorker = new ProfileUpdateWorker(Profile.this);
+                    profileUpdateWorker.setMailAddress(etMailAddress.getText().toString());
+                    profileUpdateWorker.setCourse(etCourse.getText().toString());
+                    profileUpdateWorker.setDivision(etDivision.getText().toString());
+                    profileUpdateWorker.execute();
+                } else {
+                    rlChallengeAlert = new RelativeLayout(Profile.this);
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                            RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    rlChallengeAlert.setPadding(getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
+                            0,
+                            getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
+                            0);
+
+                    TextWatcher afterTextChangedListener = new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            String password = etCurrentPassword.getText().toString();
+
+                            if (isPasswordValid(password)) {
+                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                            } else {
+                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                                etCurrentPassword.setError(getString(R.string.invalid_password));
+                            }
+                        }
+                    };
+
+                    etCurrentPassword.setHeight(getResources().getDimensionPixelSize(R.dimen.profile_challenge_input));
+                    etCurrentPassword.setHint(getString(R.string.profile_challenge_hint));
+                    etCurrentPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    etCurrentPassword.addTextChangedListener(afterTextChangedListener);
+
+                    rlChallengeAlert.addView(etCurrentPassword, layoutParams);
+
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Profile.this)
+                            .setTitle(getString(R.string.profile_challenge_current_password))
+                            .setView(rlChallengeAlert)
+                            .setPositiveButton(getString(R.string.profile_challenge_action_verify), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ProfileUpdateWorker profileUpdateWorker = new ProfileUpdateWorker(Profile.this);
+                                    profileUpdateWorker.setMailAddress(etMailAddress.getText().toString());
+                                    profileUpdateWorker.setPassword(etPassword.getText().toString());
+                                    profileUpdateWorker.setCourse(etCourse.getText().toString());
+                                    profileUpdateWorker.setDivision(etDivision.getText().toString());
+                                    profileUpdateWorker.setCurrentPassword(etCurrentPassword.getText().toString());
+                                    profileUpdateWorker.execute();
+                                }
+                            })
+                            .setNegativeButton(getString(R.string.profile_challenge_action_cancel), null)
+                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialog) {
+                                    rlChallengeAlert.removeAllViews();
+
+                                    resetView();
+                                }
+                            });
+
+                    dialog = dialogBuilder.create();
+                    dialog.show();
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                }
+            }
+        });
+
+        // Set up password validation for the etPassword field.
+        TextWatcher afterTextChangedListener = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String password = etPassword.getText().toString();
+
+                if (password.length() == EMPTY || isPasswordValid(password)) {
+                    btUpdate.setEnabled(true);
+                    btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                } else {
+                    btUpdate.setEnabled(false);
+                    btUpdate.setBackgroundColor(getResources().getColor(R.color.colorAccentDark));
+
+                    etPassword.setError(getString(R.string.invalid_password));
+                }
+            }
+        };
+        etPassword.addTextChangedListener(afterTextChangedListener);
 
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -472,10 +547,10 @@ public class Profile extends AppCompatActivity
                     ImageView icError = reference.findViewById(R.id.icError);
                     TextView tvError = reference.findViewById(R.id.tvError);
                     TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
-                    TextView etDNI = reference.findViewById(R.id.etDNI);
-                    TextView etMailAddress = reference.findViewById(R.id.etMailAddress);
-                    TextView etPassword = reference.findViewById(R.id.etPassword);
-                    TextView etFullName = reference.findViewById(R.id.etFullName);
+                    EditText etDNI = reference.findViewById(R.id.etDNI);
+                    EditText etMailAddress = reference.findViewById(R.id.etMailAddress);
+                    EditText etPassword = reference.findViewById(R.id.etPassword);
+                    EditText etFullName = reference.findViewById(R.id.etFullName);
                     LinearLayout llCourseDivision = reference.findViewById(R.id.llCourseDivision);
                     ProgressBar progressBar = reference.findViewById(R.id.progressBar);
                     ImageView icProfile = reference.findViewById(R.id.icProfile);
@@ -572,12 +647,12 @@ public class Profile extends AppCompatActivity
                                         TextView tvError = reference.findViewById(R.id.tvError);
                                         ProgressBar progressBar = reference.findViewById(R.id.progressBar);
                                         ImageView icProfile = reference.findViewById(R.id.icProfile);
-                                        TextView etDNI = reference.findViewById(R.id.etDNI);
-                                        TextView etMailAddress = reference.findViewById(R.id.etMailAddress);
-                                        TextView etPassword = reference.findViewById(R.id.etPassword);
-                                        TextView etFullName = reference.findViewById(R.id.etFullName);
-                                        TextView etCourse = reference.findViewById(R.id.etCourse);
-                                        TextView etDivision = reference.findViewById(R.id.etDivision);
+                                        EditText etDNI = reference.findViewById(R.id.etDNI);
+                                        EditText etMailAddress = reference.findViewById(R.id.etMailAddress);
+                                        EditText etPassword = reference.findViewById(R.id.etPassword);
+                                        EditText etFullName = reference.findViewById(R.id.etFullName);
+                                        EditText etCourse = reference.findViewById(R.id.etCourse);
+                                        EditText etDivision = reference.findViewById(R.id.etDivision);
                                         LinearLayout llCourseDivision = reference.findViewById(R.id.llCourseDivision);
                                         Button btUpdate = reference.findViewById(R.id.btUpdate);
 
@@ -595,7 +670,7 @@ public class Profile extends AppCompatActivity
                                         try {
                                             etDNI.setText(jsonObject.getString("DNI"));
                                             etMailAddress.setText(jsonObject.getString("E-Mail"));
-                                            // etPassword.setText(jsonObject.getString("Password"));
+                                            // setPassword.setText(jsonObject.getString("Password"));
                                             etFullName.setText(jsonObject.getString("Nombre"));
                                             etCourse.setText(jsonObject.getString("Curso"));
                                             etDivision.setText(jsonObject.getString("Division"));
