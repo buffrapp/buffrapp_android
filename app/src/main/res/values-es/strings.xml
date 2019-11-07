@@ -91,8 +91,14 @@
     <string name="profile_update_failed">No recibimos suficientes datos, \n¿estás usando la última versión?</string>
     <string name="profile_update_success">Listo, ¡tu perfil fue actualizado!</string>
     <string name="profile_challenge_current_password">Verificación de seguridad</string>
-    <string name="profile_challenge_action_cancel">Cancelar</string>
+    <string name="action_cancel">Cancelar</string>
     <string name="profile_challenge_action_verify">Verificar</string>
     <string name="profile_challenge_failed">Esa no es la contraseña correcta, por favor probá otra vez.</string>
     <string name="profile_challenge_hint">Escribí tu contraseña actual</string>
+    <string name="report_fail">Hubo un problema al enviar tu reporte, por favor probá otra vez más tarde.</string>
+    <string name="report_success">¡Tu reporte se envió con éxito!</string>
+    <string name="report_hint">Acá va el problema que estás experimentando…</string>
+    <string name="report_title">Reportar un problema</string>
+    <string name="report_invalid_content">Tenés que escribir algo.</string>
+    <string name="action_send">Enviar</string>
 </resources>

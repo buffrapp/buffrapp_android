@@ -28,4 +28,5 @@
     <style name="NoTransitions" parent="AppTheme.NoActionBar">
         <item name="android:windowAnimationStyle">@null</item>
     </style>
+
 </resources>

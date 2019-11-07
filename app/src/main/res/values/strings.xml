@@ -24,6 +24,7 @@
     <string name="request_cancelOrder" translatable="false">cancelOrder</string>
     <string name="request_getUserProfile" translatable="false">getUserProfile</string>
     <string name="request_setUserProfile" translatable="false">setUserProfile</string>
+    <string name="request_sendTechnicalReport" translatable="false">sendTechnicalReport</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
     <string name="key_session_user_name" translatable="false">session_user_name</string>
@@ -120,9 +121,17 @@
     <string name="profile_update_success">Done, your profile has been updated!</string>
     <string name="profile_challenge_current_password">Security check</string>
     <string name="profile_challenge_action_verify">Verify</string>
-    <string name="profile_challenge_action_cancel">Cancel</string>
+    <string name="action_cancel">Cancel</string>
     <string name="profile_challenge_failed">That\'s not the right password, please try again.</string>
     <string name="profile_challenge_hint">Type your current password</string>
+
+    <!-- Reports: com.buffrapp.ReportWorker -->
+    <string name="report_success">Success sending report!</string>
+    <string name="report_fail">Failed to send report, please try again later.</string>
+    <string name="report_hint">Here goes the problem you\'re experiencing…</string>
+    <string name="report_title">Report a problem</string>
+    <string name="report_invalid_content">You must type something.</string>
+    <string name="action_send">Send</string>
 
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>

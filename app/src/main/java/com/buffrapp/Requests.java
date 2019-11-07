@@ -11,14 +11,20 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,6 +84,11 @@ public class Requests extends AppCompatActivity
     private static Timer timer;
     private static NetworkWorker networkWorker;
 
+    private EditText etReportContent;
+    private AlertDialog dialog;
+
+    private RelativeLayout rlReportAlert;
+
     private int navCurrentId = -1;
 
     private DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -98,6 +109,9 @@ public class Requests extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
+
+        dialog = null;
+        etReportContent = new EditText(this);
 
         Intent intent = new Intent(this, OrderStatusLooper.class);
         stopService(intent);
@@ -322,6 +336,80 @@ public class Requests extends AppCompatActivity
         TextView textViewNavInfo = findViewById(R.id.textViewNavInfo);
         textViewNavInfo.setText(PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_session_user_name), getString(R.string.unknown_user)));
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_report:
+                rlReportAlert = new RelativeLayout(Requests.this);
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
+                );
+                rlReportAlert.setPadding(getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
+                        0,
+                        getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin),
+                        0);
+
+                TextWatcher afterTextChangedListener = new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        String reportContent = etReportContent.getText().toString();
+
+                        if (reportContent.length() < 1) {
+                            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                            etReportContent.setError(getString(R.string.report_invalid_content));
+                        } else {
+                            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                        }
+                    }
+                };
+
+                etReportContent.setHeight(RelativeLayout.LayoutParams.MATCH_PARENT);
+                etReportContent.setHint(getString(R.string.report_hint));
+                etReportContent.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+                etReportContent.setGravity(Gravity.TOP);
+                etReportContent.addTextChangedListener(afterTextChangedListener);
+
+                rlReportAlert.addView(etReportContent, layoutParams);
+
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Requests.this)
+                        .setTitle(getString(R.string.report_title))
+                        .setView(rlReportAlert)
+                        .setPositiveButton(getString(R.string.action_send), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ReportWorker reportWorker = new ReportWorker(Requests.this);
+                                reportWorker.setReportContent(etReportContent.getText().toString());
+                                reportWorker.execute();
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.action_cancel), null)
+                        .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                rlReportAlert.removeAllViews();
+                            }
+                        });
+
+                dialog = dialogBuilder.create();
+                dialog.show();
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+
+                break;
+            default:
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
