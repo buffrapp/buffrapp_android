@@ -47,8 +47,18 @@ public class ReportWorker extends AsyncTask<Void, Void, Void> {
         this.reportContent = reportContent;
     }
 
-    private String getEncodedProfileData(String key, String reportText) {
-        return SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + reportText;
+    private String getEncodedProfileData(String key, String activityName, String reportText) {
+        return SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + activityName +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 1 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.MANUFACTURER +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 2 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.MODEL +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 3 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.PRODUCT +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 4 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.FINGERPRINT +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 5 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.BOARD +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 6 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.TIME +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 7 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.VERSION.RELEASE +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 8 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.VERSION.CODENAME +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 9 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + Build.VERSION.SDK_INT +
+                SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 10 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + reportText;
     }
 
     private void showInternalError(final String message) {
@@ -76,14 +86,6 @@ public class ReportWorker extends AsyncTask<Void, Void, Void> {
             return null;
         }
 
-        reportContent = "Activity: " + reference.getClass().getSimpleName() + "\n"
-                + "Device: " + Build.MANUFACTURER + " " + Build.MODEL + " (" + Build.PRODUCT + ")\n"
-                + "Fingerprint: " + Build.FINGERPRINT + "\n"
-                + "Motherboard: " + Build.BOARD + "\n"
-                + "Compilation date: " + Build.TIME + "\n"
-                + "Operating system: Android " + Build.VERSION.RELEASE + " " + "(" + Build.VERSION.CODENAME + ", SDK " + Build.VERSION.SDK_INT + ")\n"
-                + "Additional notes: \n\n" + reportContent;
-
         String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
         Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
 
@@ -109,7 +111,11 @@ public class ReportWorker extends AsyncTask<Void, Void, Void> {
                 Uri.Builder builder = new Uri.Builder()
                         .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_sendTechnicalReport));
 
-                String query = builder.build().getEncodedQuery() + getEncodedProfileData(reference.getString(R.string.server_content_param), reportContent);
+                String query = builder.build().getEncodedQuery() + getEncodedProfileData(
+                        reference.getString(R.string.server_content_param),
+                        reference.getClass().getSimpleName(),
+                        reportContent);
+
                 Log.d(TAG, "doInBackground: query: " + query);
 
                 // Write POST data.

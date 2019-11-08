@@ -17,7 +17,7 @@
     <string name="server_cookie_request_key" translatable="false">Cookie</string>
 
     <string name="request_doUserLogin" translatable="false">doUserLogin</string>
-    <string name="request_getProducts" translatable="false">getProducts</string>
+    <string name="request_getUserProducts" translatable="false">getUserProducts</string>
     <string name="request_getUserHistory" translatable="false">getUserHistory</string>
     <string name="request_makeOrder" translatable="false">makeOrder</string>
     <string name="request_getUserOrders" translatable="false">getUserOrders</string>

@@ -413,7 +413,7 @@ public class Products extends AppCompatActivity
                     httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
 
                     Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getProducts));
+                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getUserProducts));
 
                     String query = builder.build().getEncodedQuery();
 
