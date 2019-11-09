@@ -587,6 +587,10 @@ public class Products extends AppCompatActivity
                                     Intent intent = new Intent(reference, OrderStatusLooper.class);
                                     reference.stopService(intent);
                                     reference.startService(intent);
+
+                                    Intent orderStatusDisplay = new Intent(reference, Requests.class);
+                                    reference.startActivity(orderStatusDisplay);
+                                    reference.finish();
                                 }
                             });
                             break;
