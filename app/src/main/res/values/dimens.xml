@@ -18,6 +18,7 @@
     <dimen name="rv_item_padding">8dp</dimen>
     <dimen name="drawable_padding">4dp</dimen>
     <dimen name="icon_margin_unwrapped">2dp</dimen>
-    <dimen name="progressbar_padding">16dp</dimen>
+    <dimen name="progressbar_padding">16dp</dimen>>
+    <dimen name="spinner_cancel_height">8sp</dimen>
     <dimen name="icon_square_size">24dp</dimen>
 </resources>

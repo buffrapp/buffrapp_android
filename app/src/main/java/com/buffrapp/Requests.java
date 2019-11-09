@@ -20,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -39,6 +38,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.shape.Circle;
@@ -79,6 +79,7 @@ public class Requests extends AppCompatActivity
     private boolean shouldTryToUpdate;
     private boolean firstDelivery;
     private boolean shouldDisplayConfetti;
+    private boolean isCancelling;
 
     private static Timer timer;
     private static NetworkWorker networkWorker;
@@ -87,6 +88,8 @@ public class Requests extends AppCompatActivity
     private AlertDialog dialog;
 
     private RelativeLayout rlReportAlert;
+    private MaterialRippleLayout cancelButtonLayout;
+    private ProgressBar progressBarCancel;
 
     private DrawerHandler drawerHandler;
 
@@ -95,6 +98,16 @@ public class Requests extends AppCompatActivity
         public void onClick(DialogInterface dialog, int which) {
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
+                    isCancelling = true;
+
+                    if (isCancelling) {
+                        cancelButtonLayout.setVisibility(View.GONE);
+                        progressBarCancel.setVisibility(View.VISIBLE);
+                    } else {
+                        cancelButtonLayout.setVisibility(View.VISIBLE);
+                        progressBarCancel.setVisibility(View.GONE);
+                    }
+
                     OrderCancelNetworkWorker orderCancelNetworkWorker = new OrderCancelNetworkWorker(Requests.this);
                     orderCancelNetworkWorker.execute();
                     break;
@@ -109,6 +122,8 @@ public class Requests extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
 
+        isCancelling = false;
+
         drawerHandler = new DrawerHandler(this);
 
         dialog = null;
@@ -120,10 +135,15 @@ public class Requests extends AppCompatActivity
         final SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
         ProgressBar progressBar = findViewById(R.id.requests_order_progress);
+        Drawable drawable;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            Drawable drawable = DrawableCompat.wrap(progressBar.getProgressDrawable());
+            drawable = DrawableCompat.wrap(progressBar.getProgressDrawable());
             DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.colorRed));
             progressBar.setProgressDrawable(DrawableCompat.unwrap(drawable));
+
+            drawable = DrawableCompat.wrap(progressBar.getProgressDrawable());
+            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.colorPrimary));
+            progressBarCancel.setProgressDrawable(DrawableCompat.unwrap(drawable));
         }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -133,7 +153,9 @@ public class Requests extends AppCompatActivity
         final NavigationView navigationView = findViewById(R.id.nav_view);
 
         final TextView productNameTextView = findViewById(R.id.requests_order_product_name);
-        Button cancelButton = findViewById(R.id.requests_order_cancel);
+
+        cancelButtonLayout = findViewById(R.id.requests_order_cancel);
+        progressBarCancel = findViewById(R.id.requests_order_progress_cancel);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -244,7 +266,7 @@ public class Requests extends AppCompatActivity
 
         drawer.addDrawerListener(drawerHandler);
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        cancelButtonLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(Requests.this);
@@ -401,7 +423,7 @@ public class Requests extends AppCompatActivity
                     TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
                     TextView statusTextView = reference.findViewById(R.id.requests_order_status);
                     ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
-                    Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
+                    MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
@@ -414,7 +436,7 @@ public class Requests extends AppCompatActivity
                     productNameTextView.setVisibility(View.GONE);
                     statusTextView.setVisibility(View.GONE);
                     progressBar.setVisibility(View.GONE);
-                    cancelButton.setVisibility(View.GONE);
+                    cancelButtonLayout.setVisibility(View.GONE);
 
                     errorImageView.setVisibility(View.VISIBLE);
                     errorTextView.setVisibility(View.VISIBLE);
@@ -443,7 +465,8 @@ public class Requests extends AppCompatActivity
                     TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
                     TextView statusTextView = reference.findViewById(R.id.requests_order_status);
                     ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
-                    Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
+                    MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
+                    ProgressBar progressBarCancel = reference.findViewById(R.id.requests_order_progress_cancel);
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
@@ -456,7 +479,8 @@ public class Requests extends AppCompatActivity
                     productNameTextView.setVisibility(View.GONE);
                     statusTextView.setVisibility(View.GONE);
                     progressBar.setVisibility(View.GONE);
-                    cancelButton.setVisibility(View.GONE);
+                    cancelButtonLayout.setVisibility(View.GONE);
+                    progressBarCancel.setVisibility(View.GONE);
 
                     errorImageView.setVisibility(View.GONE);
                     errorTextView.setVisibility(View.GONE);
@@ -486,6 +510,8 @@ public class Requests extends AppCompatActivity
                     TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
                     TextView statusTextView = reference.findViewById(R.id.requests_order_status);
                     ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
+                    MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
+                    ProgressBar progressBarCancel = reference.findViewById(R.id.requests_order_progress_cancel);
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
@@ -498,6 +524,14 @@ public class Requests extends AppCompatActivity
                     productNameTextView.setVisibility(View.VISIBLE);
                     statusTextView.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.VISIBLE);
+
+                    if (reference.isCancelling) {
+                        cancelButtonLayout.setVisibility(View.GONE);
+                        progressBarCancel.setVisibility(View.VISIBLE);
+                    } else {
+                        cancelButtonLayout.setVisibility(View.VISIBLE);
+                        progressBarCancel.setVisibility(View.GONE);
+                    }
 
                     errorImageView.setVisibility(View.GONE);
                     errorTextView.setVisibility(View.GONE);
@@ -663,12 +697,12 @@ public class Requests extends AppCompatActivity
                                     final TextView productStatusTextView = reference.findViewById(R.id.requests_order_status);
 
                                     // On most cases it should be gone, so this will be the default behavior.
-                                    final Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
+                                    final MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
 
                                     reference.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            cancelButton.setVisibility(View.GONE);
+                                            cancelButtonLayout.setVisibility(View.GONE);
                                         }
                                     });
 
@@ -689,7 +723,7 @@ public class Requests extends AppCompatActivity
                                             @Override
                                             public void run() {
                                                 productStatusTextView.setText(reference.getString(R.string.requests_order_received));
-                                                cancelButton.setVisibility(View.VISIBLE);
+                                                cancelButtonLayout.setVisibility(View.VISIBLE);
                                             }
                                         });
                                     } else if (order.isNull("FH_Listo")) {
@@ -830,7 +864,7 @@ public class Requests extends AppCompatActivity
                     TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
                     TextView statusTextView = reference.findViewById(R.id.requests_order_status);
                     ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
-                    Button cancelButton = reference.findViewById(R.id.requests_order_cancel);
+                    MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
 
                     ImageView errorImageView = reference.findViewById(R.id.ic_error);
                     TextView errorTextView = reference.findViewById(R.id.tv_error);
@@ -842,7 +876,7 @@ public class Requests extends AppCompatActivity
                     productNameTextView.setVisibility(View.GONE);
                     statusTextView.setVisibility(View.GONE);
                     progressBar.setVisibility(View.GONE);
-                    cancelButton.setVisibility(View.GONE);
+                    cancelButtonLayout.setVisibility(View.GONE);
 
                     errorImageView.setVisibility(View.GONE);
                     errorTextView.setVisibility(View.GONE);
@@ -918,7 +952,7 @@ public class Requests extends AppCompatActivity
                         case CANCEL_NOT_ALLOWED:
                             showInternalError(reference.getString(R.string.not_allowed_error));
                             break;
-                        default:
+                        case CANCEL_PASS:
                             showNoOrders();
                             reference.runOnUiThread(new Runnable() {
                                 @Override
@@ -926,6 +960,24 @@ public class Requests extends AppCompatActivity
                                     Toast.makeText(reference, reference.getString(R.string.requests_order_cancel_success), Toast.LENGTH_LONG).show();
                                 }
                             });
+                    }
+
+                    if (reference.isCancelling) {
+                        reference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                reference.cancelButtonLayout.setVisibility(View.GONE);
+                                reference.progressBarCancel.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    } else {
+                        reference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                reference.cancelButtonLayout.setVisibility(View.VISIBLE);
+                                reference.progressBarCancel.setVisibility(View.GONE);
+                            }
+                        });
                     }
 
                     Log.d(TAG, "doInBackground: stringBuilder: " + stringBuilder.toString());

@@ -69,16 +69,17 @@
                     android:visibility="gone" />
 
                 <com.balysv.materialripple.MaterialRippleLayout
+                    android:id="@+id/requests_order_cancel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/requests_order_status"
                     android:layout_centerInParent="true"
                     android:layout_marginTop="@dimen/activity_vertical_margin_info"
                     app:mrl_rippleColor="@color/white"
+                    android:visibility="gone"
                     app:mrl_rippleOverlay="true">
 
                     <Button
-                        android:id="@+id/requests_order_cancel"
                         android:layout_width="150sp"
                         android:layout_height="@dimen/login_button_height"
                         android:background="@color/colorAccent"
@@ -86,8 +87,7 @@
                         android:text="@string/action_request_cancel"
                         android:textAlignment="center"
                         android:textColor="@color/white"
-                        android:textSize="15sp"
-                        android:visibility="gone" />
+                        android:textSize="15sp" />
                 </com.balysv.materialripple.MaterialRippleLayout>
 
                 <ProgressBar
@@ -102,6 +102,18 @@
                     android:paddingRight="@dimen/progressbar_padding"
                     android:progress="0"
                     android:progressTint="@color/colorRed"
+                    android:progressTintMode="src_in"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/requests_order_progress_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/spinner_cancel_height"
+                    android:layout_below="@+id/requests_order_status"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:progressTint="@color/colorPrimary"
                     android:progressTintMode="src_in"
                     android:visibility="gone" />
 
