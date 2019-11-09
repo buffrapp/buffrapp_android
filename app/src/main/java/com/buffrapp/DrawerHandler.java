@@ -72,7 +72,9 @@ public class DrawerHandler implements DrawerLayout.DrawerListener {
 
             Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
 
-            activity.finish();
+            if (!activity.getWindow().getDecorView().isShown()) {
+                activity.finish();
+            }
         }
     }
 }
