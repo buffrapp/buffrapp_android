@@ -34,7 +34,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.buffrapp.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.shape.Circle;
@@ -77,7 +76,7 @@ public class Products extends AppCompatActivity
 
     private RelativeLayout rlReportAlert;
 
-    private int navCurrentId = -1;
+    private DrawerHandler drawerHandler;
 
     private int productId = -1;
     private DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -101,6 +100,9 @@ public class Products extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_products);
+
+        drawerHandler = new DrawerHandler(getApplicationContext(), this);
 
         Intent orderStatusLooperIntent = new Intent(this, OrderStatusLooper.class);
         stopService(orderStatusLooperIntent);
@@ -110,8 +112,6 @@ public class Products extends AppCompatActivity
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
-
-        setContentView(R.layout.activity_products);
 
         dialog = null;
         etReportContent = new EditText(this);
@@ -169,56 +169,7 @@ public class Products extends AppCompatActivity
             editor.apply();
         }
 
-        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-            }
-
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-            }
-
-            @SuppressWarnings("ConstantConditions")
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-                if (navCurrentId != R.id.nav_products) {
-                    // Handle navigation view item clicks here.
-                    if (navCurrentId < 0) {
-                        Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
-                    } else {
-                        if (navCurrentId == R.id.nav_requests) {
-                            Intent intent = new Intent(Products.this, Requests.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_history) {
-                            Intent intent = new Intent(Products.this, History.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_schedule) {
-
-                        } else if (navCurrentId == R.id.nav_profile) {
-                            Intent intent = new Intent(Products.this, Profile.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_logout) {
-                            Log.d(TAG, "onDrawerClosed: clearing session and restarting...");
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Products.this);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.remove(getString(R.string.key_session_id));
-                            editor.apply();
-
-                            Intent intent = new Intent(Products.this, LoginActivity.class);
-                            startActivity(intent);
-                        }
-
-                        Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
-
-                        finish();
-                    }
-                }
-            }
-        });
+        drawer.addDrawerListener(drawerHandler);
     }
 
     private void showRvTapTarget() {
@@ -374,7 +325,8 @@ public class Products extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        navCurrentId = item.getItemId();
+        drawerHandler.setNavCurrentId(item.getItemId());
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

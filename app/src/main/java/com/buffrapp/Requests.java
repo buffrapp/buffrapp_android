@@ -39,7 +39,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.buffrapp.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.shape.Circle;
@@ -89,7 +88,7 @@ public class Requests extends AppCompatActivity
 
     private RelativeLayout rlReportAlert;
 
-    private int navCurrentId = -1;
+    private DrawerHandler drawerHandler;
 
     private DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
         @Override
@@ -109,6 +108,8 @@ public class Requests extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
+
+        drawerHandler = new DrawerHandler(getApplicationContext(), this);
 
         dialog = null;
         etReportContent = new EditText(this);
@@ -241,54 +242,7 @@ public class Requests extends AppCompatActivity
             editor.apply();
         }
 
-        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-            }
-
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-            }
-
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-                if (navCurrentId != R.id.nav_requests) {
-                    // Handle navigation view item clicks here.
-                    if (navCurrentId < 0) {
-                        Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
-                    } else {
-                        if (navCurrentId == R.id.nav_products) {
-                            Intent intent = new Intent(Requests.this, Products.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_history) {
-                            Intent intent = new Intent(Requests.this, History.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_schedule) {
-
-                        } else if (navCurrentId == R.id.nav_profile) {
-                            Intent intent = new Intent(Requests.this, Profile.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_logout) {
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Requests.this);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.remove(getString(R.string.key_session_id));
-                            editor.apply();
-
-                            Intent intent = new Intent(Requests.this, LoginActivity.class);
-                            startActivity(intent);
-                        }
-
-                        Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
-
-                        finish();
-                    }
-                }
-            }
-        });
+        drawer.addDrawerListener(drawerHandler);
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -414,7 +368,8 @@ public class Requests extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        navCurrentId = item.getItemId();
+        drawerHandler.setNavCurrentId(item.getItemId());
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

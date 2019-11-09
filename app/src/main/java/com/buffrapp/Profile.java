@@ -1,7 +1,6 @@
 package com.buffrapp;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.SSLCertificateSocketFactory;
 import android.net.Uri;
@@ -34,7 +33,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.buffrapp.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.shape.Circle;
@@ -64,8 +62,6 @@ public class Profile extends AppCompatActivity
     private static final String TAG = "Profile";
     private static final int EMPTY = 0;
 
-    private int navCurrentId = -1;
-
     private EditText etPassword;
     private EditText etMailAddress;
     private EditText etCourse;
@@ -78,6 +74,8 @@ public class Profile extends AppCompatActivity
 
     private RelativeLayout rlChallengeAlert;
     private RelativeLayout rlReportAlert;
+
+    private DrawerHandler drawerHandler;
 
     private void resetView() {
         btUpdate.setText(getString(R.string.action_profile_send_update));
@@ -96,6 +94,8 @@ public class Profile extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        drawerHandler = new DrawerHandler(getApplicationContext(), this);
 
         etMailAddress = findViewById(R.id.etMailAddress);
         etPassword = findViewById(R.id.etPassword);
@@ -273,54 +273,7 @@ public class Profile extends AppCompatActivity
         };
         etPassword.addTextChangedListener(afterTextChangedListener);
 
-        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-            }
-
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-            }
-
-            @SuppressWarnings("ConstantConditions")
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-                if (navCurrentId != R.id.nav_profile) {
-                    // Handle navigation view item clicks here.
-                    if (navCurrentId < 0) {
-                        Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
-                    } else {
-                        if (navCurrentId == R.id.nav_products) {
-                            Intent intent = new Intent(Profile.this, Products.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_requests) {
-                            Intent intent = new Intent(Profile.this, Requests.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_history) {
-                            Intent intent = new Intent(Profile.this, History.class);
-                            startActivity(intent);
-                        } else if (navCurrentId == R.id.nav_schedule) {
-                        } else if (navCurrentId == R.id.nav_logout) {
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Profile.this);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.remove(getString(R.string.key_session_id));
-                            editor.apply();
-
-                            Intent intent = new Intent(Profile.this, LoginActivity.class);
-                            startActivity(intent);
-                        }
-
-                        Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
-
-                        finish();
-                    }
-                }
-            }
-        });
+        drawer.addDrawerListener(drawerHandler);
     }
 
     @Override
@@ -419,7 +372,8 @@ public class Profile extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        navCurrentId = item.getItemId();
+        drawerHandler.setNavCurrentId(item.getItemId());
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
