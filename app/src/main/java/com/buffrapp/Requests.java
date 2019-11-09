@@ -109,7 +109,7 @@ public class Requests extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
 
-        drawerHandler = new DrawerHandler(getApplicationContext(), this);
+        drawerHandler = new DrawerHandler(this);
 
         dialog = null;
         etReportContent = new EditText(this);

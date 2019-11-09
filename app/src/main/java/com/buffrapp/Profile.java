@@ -95,7 +95,7 @@ public class Profile extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        drawerHandler = new DrawerHandler(getApplicationContext(), this);
+        drawerHandler = new DrawerHandler(this);
 
         etMailAddress = findViewById(R.id.etMailAddress);
         etPassword = findViewById(R.id.etPassword);

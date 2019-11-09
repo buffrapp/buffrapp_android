@@ -1,12 +1,12 @@
 package com.buffrapp;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -18,15 +18,11 @@ public class DrawerHandler implements DrawerLayout.DrawerListener {
     private int navCurrentId;
     private Activity activity;
 
-    public DrawerHandler(Context context, Activity activity) {
+    DrawerHandler(Activity activity) {
         this.activity = activity;
     }
 
-    public int getNavCurrentId() {
-        return navCurrentId;
-    }
-
-    public void setNavCurrentId(int navCurrentId) {
+    void setNavCurrentId(int navCurrentId) {
         this.navCurrentId = navCurrentId;
     }
 
@@ -45,36 +41,38 @@ public class DrawerHandler implements DrawerLayout.DrawerListener {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void onDrawerClosed(@NonNull View drawerView) {
-        if (navCurrentId != R.id.nav_history) {
-            // Handle navigation view item clicks here.
-            if (navCurrentId < 0) {
-                Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
-            } else {
-                if (navCurrentId == R.id.nav_products) {
-                    Intent intent = new Intent(activity, Products.class);
-                    activity.startActivity(intent);
-                } else if (navCurrentId == R.id.nav_requests) {
-                    Intent intent = new Intent(activity, Requests.class);
-                    activity.startActivity(intent);
-                } else if (navCurrentId == R.id.nav_schedule) {
+        // Handle navigation view item clicks here.
+        if (navCurrentId < 0) {
+            Log.d(TAG, "onDrawerClosed: no item selected, skipping action...");
+        } else {
+            if (navCurrentId == R.id.nav_products) {
+                Intent intent = new Intent(activity, Products.class);
+                activity.startActivity(intent);
+            } else if (navCurrentId == R.id.nav_requests) {
+                Intent intent = new Intent(activity, Requests.class);
+                activity.startActivity(intent);
+            } else if (navCurrentId == R.id.nav_history) {
+                Intent intent = new Intent(activity, History.class);
+                activity.startActivity(intent);
+            } else if (navCurrentId == R.id.nav_schedule) {
+                Toast.makeText(activity, activity.getString(R.string.unimplemented_feature), Toast.LENGTH_LONG).show();
+                return;
+            } else if (navCurrentId == R.id.nav_profile) {
+                Intent intent = new Intent(activity, Profile.class);
+                activity.startActivity(intent);
+            } else if (navCurrentId == R.id.nav_logout) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.remove(activity.getString(R.string.key_session_id));
+                editor.apply();
 
-                } else if (navCurrentId == R.id.nav_profile) {
-                    Intent intent = new Intent(activity, Profile.class);
-                    activity.startActivity(intent);
-                } else if (navCurrentId == R.id.nav_logout) {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.remove(activity.getString(R.string.key_session_id));
-                    editor.apply();
-
-                    Intent intent = new Intent(activity, LoginActivity.class);
-                    activity.startActivity(intent);
-                }
-
-                Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
-
-                activity.finish();
+                Intent intent = new Intent(activity, LoginActivity.class);
+                activity.startActivity(intent);
             }
+
+            Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);
+
+            activity.finish();
         }
     }
 }

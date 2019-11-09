@@ -43,6 +43,7 @@
     <string name="not_allowed_error">You\'re not allowed to do that, please logout and sign in again.</string>
     <string name="unknown_user">Unknown user</string>
     <string name="action_report">Report a problem</string>
+    <string name="unimplemented_feature">Oops! You got us there, that feature isn\'t available yet.</string>
 
     <!-- Strings related to login -->
     <string name="welcome">"Hi!\n\nTo keep going, log in."</string>

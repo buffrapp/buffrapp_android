@@ -101,4 +101,5 @@
     <string name="report_title">Reportar un problema</string>
     <string name="report_invalid_content">Tenés que escribir algo.</string>
     <string name="action_send">Enviar</string>
+    <string name="unimplemented_feature">¡Ups! Nos atrapaste, esa característica todavía no está disponible.</string>
 </resources>

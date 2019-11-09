@@ -73,7 +73,7 @@ public class History extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
-        drawerHandler = new DrawerHandler(getApplicationContext(), this);
+        drawerHandler = new DrawerHandler(this);
 
         etReportContent = new EditText(this);
 

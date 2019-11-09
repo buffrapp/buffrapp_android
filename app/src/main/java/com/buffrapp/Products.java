@@ -102,7 +102,7 @@ public class Products extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_products);
 
-        drawerHandler = new DrawerHandler(getApplicationContext(), this);
+        drawerHandler = new DrawerHandler(this);
 
         Intent orderStatusLooperIntent = new Intent(this, OrderStatusLooper.class);
         stopService(orderStatusLooperIntent);
