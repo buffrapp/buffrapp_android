@@ -494,7 +494,7 @@ public class Requests extends AppCompatActivity
             });
         }
 
-        private void showDataFields() {
+        private void showDataFields(final boolean isCancellable) {
             Log.d(TAG, "doInBackground: an order has been found.");
             final Requests reference = requestsActivity.get();
 
@@ -529,7 +529,11 @@ public class Requests extends AppCompatActivity
                         cancelButtonLayout.setVisibility(View.GONE);
                         progressBarCancel.setVisibility(View.VISIBLE);
                     } else {
-                        cancelButtonLayout.setVisibility(View.VISIBLE);
+                        if (isCancellable) {
+                            cancelButtonLayout.setVisibility(View.VISIBLE);
+                        } else {
+                            cancelButtonLayout.setVisibility(View.GONE);
+                        }
                         progressBarCancel.setVisibility(View.GONE);
                     }
 
@@ -697,6 +701,7 @@ public class Requests extends AppCompatActivity
                                     final TextView productStatusTextView = reference.findViewById(R.id.requests_order_status);
 
                                     // On most cases it should be gone, so this will be the default behavior.
+                                    boolean isCancellable = false;
                                     final MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
 
                                     reference.runOnUiThread(new Runnable() {
@@ -723,9 +728,10 @@ public class Requests extends AppCompatActivity
                                             @Override
                                             public void run() {
                                                 productStatusTextView.setText(reference.getString(R.string.requests_order_received));
-                                                cancelButtonLayout.setVisibility(View.VISIBLE);
                                             }
                                         });
+
+                                        isCancellable = true;
                                     } else if (order.isNull("FH_Listo")) {
                                         setProgressBarStatus(50, R.color.colorOngoing);
                                         reference.runOnUiThread(new Runnable() {
@@ -784,7 +790,7 @@ public class Requests extends AppCompatActivity
                                     }
 
                                     reference.shouldRunBackgroundWorkerOnStop = true;
-                                    showDataFields();
+                                    showDataFields(isCancellable);
                                 }
                             } else {
                                 showInternalError(reference.getString(R.string.internal_error));
