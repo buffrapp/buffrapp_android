@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">BuffRApp</string>
     <string name="version">Version %s</string>
+    <string name="version_error">Unknown</string>
 
     <!-- Notifications -->
     <string name="channel_name">Order status notifications</string>
@@ -126,6 +127,19 @@
     <string name="profile_challenge_failed">That\'s not the right password, please try again.</string>
     <string name="profile_challenge_hint">Type your current password</string>
 
+    <!-- About -->
+    <string name="about_credits">Created by: \n\n%s %s</string>
+    <string name="about_credits_people" translatable="false">- Leonel Moyano\n\n- Aracelli González\n\n- Facundo Montero\n\n</string>
+    <string name="about_credits_oss">With the help of the following open source libraries: \n\n%s</string>
+    <string name="about_credits_oss_license"> under the terms of the </string>
+    <string name="about_credits_oss_license_container" translatable="false">(%s %s).\n\n</string>
+    <string name="about_credits_oss_spotlight" translatable="false">Spotlight %s</string>
+    <string name="about_credits_oss_konfetti" translatable="false">Konfetti %s</string>
+    <string name="about_credits_oss_material_ripple" translatable="false">Material Ripple %s</string>
+    <string name="about_credits_oss_license_apache2">Apache License, version 2.0</string>
+    <string name="about_credits_oss_license_isc">ISC License</string>
+
+
     <!-- Reports: com.buffrapp.ReportWorker -->
     <string name="report_success">Success sending report!</string>
     <string name="report_fail">Failed to send report, please try again later.</string>
@@ -142,11 +156,14 @@
     <string name="menu_history">History</string>
     <string name="menu_schedule">Schedule</string>
     <string name="menu_profile">Profile</string>
-    <string name="menu_account">Account</string>
+    <string name="menu_account">Account</string> <!-- Group -->
     <string name="menu_logout">Logout</string>
+    <string name="menu_information">Information</string> <!-- Group -->
+    <string name="menu_about">About</string>
     <string name="title_activity_requests">Requests</string>
     <string name="title_activity_history">History</string>
     <string name="title_activity_profile">Profile</string>
+    <string name="title_activity_about">About</string>
 
     <string name="menu_home">Home</string>
 </resources>

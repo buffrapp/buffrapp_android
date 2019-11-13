@@ -68,6 +68,9 @@ public class DrawerHandler implements DrawerLayout.DrawerListener {
 
                 Intent intent = new Intent(activity, LoginActivity.class);
                 activity.startActivity(intent);
+            } else if (navCurrentId == R.id.nav_about) {
+                Intent intent = new Intent(activity, About.class);
+                activity.startActivity(intent);
             }
 
             Log.d(TAG, "onDrawerClosed: selected ID is " + navCurrentId);

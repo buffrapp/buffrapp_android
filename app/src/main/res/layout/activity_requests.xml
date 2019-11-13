@@ -38,7 +38,7 @@
                 <ImageView
                     android:id="@+id/ic_requests"
                     android:layout_width="match_parent"
-                    android:layout_height="200sp"
+                    android:layout_height="@dimen/image_informative"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:contentDescription="@string/products_error"
@@ -120,7 +120,7 @@
                 <ImageView
                     android:id="@+id/ic_error"
                     android:layout_width="match_parent"
-                    android:layout_height="200sp"
+                    android:layout_height="@dimen/image_informative"
                     android:layout_gravity="center_vertical"
                     android:contentDescription="@string/products_error"
                     android:src="@drawable/ic_layout_error"
@@ -142,7 +142,7 @@
                 <ImageView
                     android:id="@+id/ic_empty"
                     android:layout_width="match_parent"
-                    android:layout_height="200sp"
+                    android:layout_height="@dimen/image_informative"
                     android:layout_gravity="center_vertical"
                     android:contentDescription="@string/products_error"
                     android:src="@drawable/ic_layout_requests_empty"

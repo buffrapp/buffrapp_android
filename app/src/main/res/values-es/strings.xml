@@ -102,4 +102,13 @@
     <string name="report_invalid_content">Tenés que escribir algo.</string>
     <string name="action_send">Enviar</string>
     <string name="unimplemented_feature">¡Ups! Nos atrapaste, esa característica todavía no está disponible.</string>
+    <string name="about_credits">Creado por: \n\n%s %s</string>
+    <string name="about_credits_oss">Con la ayuda de las siguientes bibliotecas de código abierto: \n\n%s</string>
+    <string name="about_credits_oss_license"> bajo los términos de la Licencia </string>
+    <string name="about_credits_oss_license_apache2">de Apache, versión 2.0</string>
+    <string name="version_error">desconocida</string>
+    <string name="menu_about">Acerca de</string>
+    <string name="menu_information">Información</string>
+    <string name="title_activity_about">Acerca de</string>
+    <string name="about_credits_oss_license_isc">del ISC</string>
 </resources>

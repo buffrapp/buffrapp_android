@@ -21,4 +21,5 @@
     <dimen name="progressbar_padding">16dp</dimen>>
     <dimen name="spinner_cancel_height">8sp</dimen>
     <dimen name="icon_square_size">24dp</dimen>
+    <dimen name="image_informative">200sp</dimen>
 </resources>

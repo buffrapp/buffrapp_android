@@ -49,7 +49,7 @@
         <ImageView
             android:id="@+id/icError"
             android:layout_width="match_parent"
-            android:layout_height="200sp"
+            android:layout_height="@dimen/image_informative"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/products_error"
             android:src="@drawable/ic_layout_error"
@@ -71,7 +71,7 @@
         <ImageView
             android:id="@+id/icEmptyHistory"
             android:layout_width="match_parent"
-            android:layout_height="200sp"
+            android:layout_height="@dimen/image_informative"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/no_products"
             android:src="@drawable/ic_layout_no_history"
