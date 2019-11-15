@@ -22,12 +22,7 @@
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
             </intent-filter>
         </receiver>
-
-        <activity
-            android:name=".Schedule"
-            android:label="@string/title_activity_schedule"
-            android:theme="@style/AppTheme.NoActionBar" />
-
+        
         <service
             android:name=".OrderStatusLooper"
             android:enabled="true"
@@ -43,6 +38,10 @@
         <activity
             android:name=".About"
             android:label="@string/title_activity_about"
+            android:theme="@style/NoTransitions" />
+        <activity
+            android:name=".Schedule"
+            android:label="@string/title_activity_schedule"
             android:theme="@style/NoTransitions" />
         <activity
             android:name=".Profile"
