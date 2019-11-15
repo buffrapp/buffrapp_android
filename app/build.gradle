@@ -6,7 +6,7 @@ android {
         applicationId "com.buffrapp"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 5
+        versionCode 6
         versionName "0.3.0_beta"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

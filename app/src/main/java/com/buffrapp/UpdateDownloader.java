@@ -2,12 +2,9 @@ package com.buffrapp;
 
 import android.app.DownloadManager;
 import android.app.IntentService;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,20 +21,9 @@ public class UpdateDownloader extends IntentService {
     }
 
     private void removePushNotification() {
-        final int id = getResources().getInteger(R.integer.updates_notification_id);
+        final int id = getResources().getInteger(R.integer.update_ready_notification_id);
 
         Log.d(TAG, "doInBackground: removing push notification with ID " + id + "...");
-
-        String channel_name = getString(R.string.notifications_orders_channel_name);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String description = getString(R.string.notifications_orders_channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(channel_name, channel_name, importance);
-            channel.setDescription(description);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.cancel(id);
