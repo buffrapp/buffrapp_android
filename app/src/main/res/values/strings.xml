@@ -4,12 +4,17 @@
     <string name="version_error">Unknown</string>
 
     <!-- Notifications -->
-    <string name="channel_name">Order status notifications</string>
-    <string name="channel_description">Push notifications for BuffRApp.</string>
+    <string name="notifications_orders_channel_name">Order status notifications</string>
+    <string name="notifications_orders_channel_description">Push notifications for BuffRApp orders.</string>
+    <string name="notifications_updates_channel_name">Updates notifications</string>
+    <string name="notifications_updates_channel_description">Push notifications for BuffRApp\'s updates.</string>
+    <string name="notifications_update_ready_channel_name">Completed updates notifications</string>
+    <string name="notifications_update_ready_channel_description">Push notifications for BuffRApp\'s completed updates.</string>
 
     <string name="server_proto" translatable="false">https://</string>
     <string name="server_hostname" translatable="false">buffrapp.servehttp.com</string>
     <string name="server_path" translatable="false">/buffrapp_web/api.php</string>
+    <string name="server_path_latest" translatable="false">/latest.apk</string>
     <string name="server_encoding" translatable="false">UTF-8</string>
     <string name="server_request_method" translatable="false">POST</string>
     <string name="server_request_param" translatable="false">request</string>
@@ -26,6 +31,7 @@
     <string name="request_getUserProfile" translatable="false">getUserProfile</string>
     <string name="request_setUserProfile" translatable="false">setUserProfile</string>
     <string name="request_sendTechnicalReport" translatable="false">sendTechnicalReport</string>
+    <string name="request_checkForUpdates" translatable="false">checkForUpdates</string>
 
     <string name="key_session_id" translatable="false">session_id</string>
     <string name="key_session_user_name" translatable="false">session_user_name</string>
@@ -35,6 +41,7 @@
     <string name="key_first_run_requests" translatable="false">first_run_requests</string>
     <string name="key_first_run_history" translatable="false">first_run_history</string>
     <string name="key_first_run_profile" translatable="false">first_run_profile</string>
+    <string name="key_needs_storage_permission" translatable="false">needs_storage_permission</string>
 
     <!-- Misc -->
     <string name="dialog_yes">Yes</string>
@@ -148,6 +155,17 @@
     <string name="report_invalid_content">You must type something.</string>
     <string name="action_send">Send</string>
 
+    <!-- UpdatesChecker -->
+    <string name="updates_waiting">Looking for updates…</string>
+    <string name="updates_error">We couldn\'t look for updates. Are you online?</string>
+    <string name="updates_none">No updates found.</string>
+    <string name="updates_found">An update is available, please tap the notification to download it.</string>
+    <string name="notification_updates_found">There\'s a newer version available, tap here to download it.</string>
+    <string name="notification_update_ongoing">Downloading update…</string>
+    <string name="notification_update_completed">Download completed, tap here to install the update.</string>
+    <string name="toast_update_completed">Download completed, when you\'re free, check your notifications.</string>
+    <string name="updates_target_filename" translatable="false">buffrapp_latest.apk</string>
+
     <string name="menu_products">Products</string>
     <string name="menu_requests">Requests</string>
     <string name="menu_slideshow">Slideshow</string>
@@ -162,6 +180,7 @@
     <string name="menu_about">About</string>
     <string name="title_activity_requests">Requests</string>
     <string name="title_activity_history">History</string>
+    <string name="title_activity_schedule">Schedule</string>
     <string name="title_activity_profile">Profile</string>
     <string name="title_activity_about">About</string>
 

@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -55,8 +54,8 @@ public class DrawerHandler implements DrawerLayout.DrawerListener {
                 Intent intent = new Intent(activity, History.class);
                 activity.startActivity(intent);
             } else if (navCurrentId == R.id.nav_schedule) {
-                Toast.makeText(activity, activity.getString(R.string.unimplemented_feature), Toast.LENGTH_LONG).show();
-                return;
+                Intent intent = new Intent(activity, Schedule.class);
+                activity.startActivity(intent);
             } else if (navCurrentId == R.id.nav_profile) {
                 Intent intent = new Intent(activity, Profile.class);
                 activity.startActivity(intent);

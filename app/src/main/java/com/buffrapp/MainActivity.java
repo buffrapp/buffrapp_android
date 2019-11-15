@@ -33,6 +33,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        Intent updatesCheckerIntent = new Intent(this, UpdatesChecker.class);
+        stopService(updatesCheckerIntent);
+
+        try {
+            startService(updatesCheckerIntent);
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+
         finish();
     }
 }

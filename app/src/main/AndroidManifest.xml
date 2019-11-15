@@ -3,6 +3,7 @@
     package="com.buffrapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:allowBackup="true"
@@ -13,10 +14,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <receiver
+            android:name=".UpdateReadyNotifier"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".Schedule"
+            android:label="@string/title_activity_schedule"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <service
             android:name=".OrderStatusLooper"
             android:enabled="true"
             android:exported="true" />
+        <service
+            android:name=".UpdatesChecker"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".UpdateDownloader"
+            android:exported="false"></service>
 
         <activity
             android:name=".About"

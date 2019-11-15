@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="notification_id">4096</integer> <!-- Just because I love this number. -->
+    <integer name="orders_notification_id">4096</integer> <!-- Just because I love this number. -->
+    <integer name="updates_notification_id">8192</integer> <!-- Just because I love this number. -->
+    <integer name="update_ready_notification_id">16384
+    </integer> <!-- Just because I love this number. -->
     <integer name="order_id_default">-1</integer>
     <integer name="update_interval">2000</integer> <!-- ms -->
     <integer name="connection_timeout">5000</integer> <!-- ms -->

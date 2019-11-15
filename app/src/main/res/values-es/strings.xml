@@ -54,8 +54,8 @@
     <string name="requests_order_delivered_short">Tu orden fue entregada, ahora podés verla en el historial.</string>
     <string name="requests_order_ready">Tu orden está lista, ahora podés completar la entrega. \n\nLo antes posible, visitá el buffet.</string>
     <string name="requests_orders_empty">Nada por acá, ¡ordená algo!</string>
-    <string name="channel_description">Notificaciones push de BuffRApp.</string>
-    <string name="channel_name">Notificaciones de estado de orden</string>
+    <string name="notifications_orders_channel_description">Notificaciones push sobre órdenes de BuffRApp.</string>
+    <string name="notifications_orders_channel_name">Notificaciones de estado de orden</string>
     <string name="requests_order_delivered_first">¡Felicitaciones! \nEsta es tu primera orden, y ya fue entregada. \n\nAhora vas a poder verla en el historial.</string>
     <string name="products_feature_discovery">Descubrí más</string>
     <string name="products_feature_discovery_description">Tocá para ver el menú.</string>
@@ -111,4 +111,17 @@
     <string name="menu_information">Información</string>
     <string name="title_activity_about">Acerca de</string>
     <string name="about_credits_oss_license_isc">del ISC</string>
+    <string name="notifications_updates_channel_description">Notificaciones push sobre actualizaciones de BuffRApp.</string>
+    <string name="notifications_updates_channel_name">Notificaciones sobre actualizaciones</string>
+    <string name="updates_found">Hay una actualización disponible, para descargarla, tocá esta notificación.</string>
+    <string name="updates_none">No se encontraron actualizaciones.</string>
+    <string name="updates_waiting">Buscando actualizaciones…</string>
+    <string name="updates_error">No fue posible buscar actualizaciones, ¿tenés conexión?</string>
+    <string name="notification_updates_found">Hay una nueva versión disponible, tocá acá para descargarla.</string>
+    <string name="title_activity_schedule">Horarios</string>
+    <string name="notification_update_ongoing">Descargando actualización…</string>
+    <string name="notification_update_completed">Descarga completada, tocá acá para instalar la actualización.</string>
+    <string name="toast_update_completed">Descarga completada, cuando puedas, mirá tus notificaciones.</string>
+    <string name="notifications_update_ready_channel_description">Notificaciones push para actualizaciones completadas de BuffRApp.</string>
+    <string name="notifications_update_ready_channel_name">Notificaciones sobre actualizaciones completadas</string>
 </resources>

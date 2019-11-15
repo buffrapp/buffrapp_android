@@ -108,10 +108,10 @@ public class OrderStatusLooper extends Service {
 
             final int PROGRESS_MAX = 100;
 
-            String channel_name = getString(R.string.channel_name);
+            String channel_name = getString(R.string.notifications_orders_channel_name);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                String description = getString(R.string.channel_description);
+                String description = getString(R.string.notifications_orders_channel_description);
                 int importance = NotificationManager.IMPORTANCE_DEFAULT;
                 NotificationChannel channel = new NotificationChannel(channel_name, channel_name, importance);
                 channel.setDescription(description);
@@ -135,7 +135,7 @@ public class OrderStatusLooper extends Service {
                     .setOngoing(true);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify(getResources().getInteger(R.integer.notification_id), notificationBuilder.build());
+            notificationManager.notify(getResources().getInteger(R.integer.orders_notification_id), notificationBuilder.build());
 
             previousStatus = status;
         } else {
@@ -144,20 +144,21 @@ public class OrderStatusLooper extends Service {
     }
 
     private void removePushNotification() {
-        final int id = getResources().getInteger(R.integer.notification_id);
+        final int id = getResources().getInteger(R.integer.orders_notification_id);
 
         Log.d(TAG, "doInBackground: removing push notification with ID " + id + "...");
 
-        String channel_name = getString(R.string.channel_name);
+        String channel_name = getString(R.string.notifications_orders_channel_name);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String description = getString(R.string.channel_description);
+            String description = getString(R.string.notifications_orders_channel_description);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(channel_name, channel_name, importance);
             channel.setDescription(description);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.cancel(id);
     }
