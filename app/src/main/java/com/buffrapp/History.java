@@ -1,10 +1,8 @@
 package com.buffrapp;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.net.SSLCertificateSocketFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -37,22 +35,12 @@ import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.shape.Circle;
 import com.takusemba.spotlight.target.SimpleTarget;
 
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONArray;
+import org.json.JSONException;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
+import util.ActivityNetworkWorker;
 
 public class History extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, HistoryAdapter.ItemClickListener {
@@ -108,11 +96,11 @@ public class History extends AppCompatActivity
                     public void onRefresh() {
                         Log.d(TAG, "onRefresh: refreshing data...");
                         recyclerView.setVisibility(View.GONE);
-                        new NetworkWorker(History.this).execute();
+                        new HistoryNetworkWorker(History.this).execute();
                     }
                 });
 
-        new NetworkWorker(this).execute();
+        new HistoryNetworkWorker(this).execute();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPreferences.getBoolean(getString(R.string.key_first_run_history), true)) {
@@ -226,9 +214,7 @@ public class History extends AppCompatActivity
                         .setPositiveButton(getString(R.string.action_send), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ReportWorker reportWorker = new ReportWorker(History.this);
-                                reportWorker.setReportContent(etReportContent.getText().toString());
-                                reportWorker.execute();
+                                new ReportWorker(History.this, etReportContent.getText().toString()).execute();
                             }
                         })
                         .setNegativeButton(getString(R.string.action_cancel), null)
@@ -260,45 +246,23 @@ public class History extends AppCompatActivity
         return true;
     }
 
-    private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
+    private static class HistoryNetworkWorker extends ActivityNetworkWorker {
         private WeakReference<History> historyActivity;
 
         private static final String HISTORY_ERROR = "1";
         private static final String HISTORY_NOT_ALLOWED = "2";
         private static final String HISTORY_EMPTY_RESULT = "3";
 
-        NetworkWorker(History historyActivity) {
+        HistoryNetworkWorker(History historyActivity) {
             this.historyActivity = new WeakReference<>(historyActivity);
-        }
 
-        private void showInternalError(final String message) {
-            Log.d(TAG, "doInBackground: an internal error has occurred.");
-            final History reference = historyActivity.get();
+            setTargetActivity(historyActivity);
 
-            if (historyActivity == null) {
-                Log.d(TAG, "doInBackground: showInternalError: failed to get a reference.");
-                return;
+            History reference = this.historyActivity.get();
+
+            if (reference != null) {
+                setRequest(reference.getString(R.string.request_getUserHistory));
             }
-
-            reference.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ImageView icNoHistory = reference.findViewById(R.id.icEmptyHistory);
-                    TextView tvNoHistory = reference.findViewById(R.id.tvEmptyHistory);
-                    RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
-                    ImageView icError = reference.findViewById(R.id.icError);
-                    TextView tvError = reference.findViewById(R.id.tvError);
-                    TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
-
-                    icNoHistory.setVisibility(View.GONE);
-                    tvNoHistory.setVisibility(View.GONE);
-                    icError.setVisibility(View.VISIBLE);
-                    tvError.setVisibility(View.VISIBLE);
-                    tvErrorExtra.setVisibility(View.VISIBLE);
-                    tvErrorExtra.setText(message);
-                    recyclerView.setVisibility(View.GONE);
-                }
-            });
         }
 
         private void showNoHistory() {
@@ -331,111 +295,80 @@ public class History extends AppCompatActivity
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected void handleOutput(String serverOutput) {
             final History reference = historyActivity.get();
 
             if (historyActivity == null) {
-                return null;
+                return;
             }
 
-            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
-            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+            switch (serverOutput) {
+                case HISTORY_ERROR:
+                    showInternalError(reference.getString(R.string.internal_error), reference);
+                    break;
+                case HISTORY_NOT_ALLOWED:
+                    showInternalError(reference.getString(R.string.not_allowed_error), reference);
+                    break;
+                case HISTORY_EMPTY_RESULT:
+                    showNoHistory();
+                    break;
+                default:
+                    try {
+                        final JSONArray jsonArray = new JSONArray(serverOutput);
 
-            try {
-                URL url = new URL(preURL);
-                HttpsURLConnection httpsURLConnection = null;
+                        if (jsonArray.length() > 0) {
+                            Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
 
-                try {
-                    // Try to open a connection.
-                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
-                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
+                            reference.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    reference.historyAdapter.setNewData(jsonArray);
 
-                    // Set the cookies.
-                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
-                    Log.d(TAG, "doInBackground: cookie: " + cookie);
-                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
+                                    ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
+                                    TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
+                                    RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
+                                    ImageView icError = reference.findViewById(R.id.icError);
+                                    TextView tvError = reference.findViewById(R.id.tvError);
 
-                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
-                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
-                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
-
-                    Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getUserHistory));
-
-                    String query = builder.build().getEncodedQuery();
-                    Log.d(TAG, "doInBackground: query: " + query);
-
-                    // Write POST data.
-                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
-                    BufferedWriter bufferedWriter = new BufferedWriter(
-                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
-                    bufferedWriter.write(query);
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-
-                    // Retrieve the response.
-                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
-
-                    switch (stringBuilder.toString()) {
-                        case HISTORY_ERROR:
-                            showInternalError(reference.getString(R.string.internal_error));
-                            break;
-                        case HISTORY_NOT_ALLOWED:
-                            showInternalError(reference.getString(R.string.not_allowed_error));
-                            break;
-                        case HISTORY_EMPTY_RESULT:
+                                    icNoProducts.setVisibility(View.GONE);
+                                    tvNoProducts.setVisibility(View.GONE);
+                                    icError.setVisibility(View.GONE);
+                                    tvError.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        } else {
                             showNoHistory();
-                            break;
-                        default:
-                            final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-
-                            if (jsonArray.length() > 0) {
-                                Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
-
-                                reference.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        reference.historyAdapter.setNewData(jsonArray);
-
-                                        ImageView icNoProducts = reference.findViewById(R.id.icEmptyHistory);
-                                        TextView tvNoProducts = reference.findViewById(R.id.tvEmptyHistory);
-                                        RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
-                                        ImageView icError = reference.findViewById(R.id.icError);
-                                        TextView tvError = reference.findViewById(R.id.tvError);
-
-                                        icNoProducts.setVisibility(View.GONE);
-                                        tvNoProducts.setVisibility(View.GONE);
-                                        icError.setVisibility(View.GONE);
-                                        tvError.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.VISIBLE);
-                                    }
-                                });
-                            } else {
-                                showNoHistory();
-                            }
+                        }
+                    } catch (JSONException jsonException) {
+                        showInternalError(reference.getString(R.string.internal_error), reference);
                     }
-                } catch (Exception e) {
-                    showInternalError(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
-                    e.printStackTrace();
-                } finally {
-                    if (httpsURLConnection != null) {
-                        httpsURLConnection.disconnect();
-                    }
-                }
-            } catch (final MalformedURLException e) {
-                showInternalError(reference.getString(R.string.products_error_malformed_url));
-                e.printStackTrace();
             }
-            return null;
+        }
+
+        @Override
+        protected void showInternalError(final String message, final Activity reference) {
+            Log.d(TAG, "doInBackground: showInternalError: failed to get a reference.");
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView icNoHistory = reference.findViewById(R.id.icEmptyHistory);
+                    TextView tvNoHistory = reference.findViewById(R.id.tvEmptyHistory);
+                    RecyclerView recyclerView = reference.findViewById(R.id.rvHistory);
+                    ImageView icError = reference.findViewById(R.id.icError);
+                    TextView tvError = reference.findViewById(R.id.tvError);
+                    TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
+
+                    icNoHistory.setVisibility(View.GONE);
+                    tvNoHistory.setVisibility(View.GONE);
+                    icError.setVisibility(View.VISIBLE);
+                    tvError.setVisibility(View.VISIBLE);
+                    tvErrorExtra.setVisibility(View.VISIBLE);
+                    tvErrorExtra.setText(message);
+                    recyclerView.setVisibility(View.GONE);
+                }
+            });
         }
 
         @Override

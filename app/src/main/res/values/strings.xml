@@ -147,7 +147,7 @@
     <string name="about_credits_oss_license_isc">ISC License</string>
 
 
-    <!-- Reports: com.buffrapp.ReportWorker -->
+    <!-- Reports: com.buffrapp.ReportWorkerActivityActivity -->
     <string name="report_success">Success sending report!</string>
     <string name="report_fail">Failed to send report, please try again later.</string>
     <string name="report_hint">Here goes the problem you\'re experiencing…</string>

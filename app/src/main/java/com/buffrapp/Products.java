@@ -1,12 +1,10 @@
 package com.buffrapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.SSLCertificateSocketFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -41,24 +39,13 @@ import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.shape.Circle;
 import com.takusemba.spotlight.target.SimpleTarget;
 
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
+import util.ActivityNetworkWorker;
 
 public class Products extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ProductsAdapter.ItemClickListener {
@@ -90,9 +77,7 @@ public class Products extends AppCompatActivity
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
                     if (productId > -1) {
-                        OrderRequestNetworkWorker orderRequestNetworkWorker = new OrderRequestNetworkWorker(Products.this);
-                        orderRequestNetworkWorker.setProductId(productId);
-                        orderRequestNetworkWorker.execute();
+                        new OrderRequestActivityNetworkWorker(Products.this, productId).execute();
                     }
                     break;
                 case DialogInterface.BUTTON_NEGATIVE:
@@ -143,7 +128,7 @@ public class Products extends AppCompatActivity
         productsAdapter.setClickListener(this);
         recyclerView.setAdapter(productsAdapter);
 
-        new NetworkWorker(this).execute();
+        new ProductsActivityNetworkWorker(this).execute();
 
         swipeRefreshLayout.setRefreshing(true);
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
@@ -154,7 +139,7 @@ public class Products extends AppCompatActivity
                     public void onRefresh() {
                         Log.d(TAG, "onRefresh: refreshing data...");
                         recyclerView.setVisibility(View.GONE);
-                        new NetworkWorker(Products.this).execute();
+                        new ProductsActivityNetworkWorker(Products.this).execute();
                     }
                 });
 
@@ -315,9 +300,7 @@ public class Products extends AppCompatActivity
                         .setPositiveButton(getString(R.string.action_send), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ReportWorker reportWorker = new ReportWorker(Products.this);
-                                reportWorker.setReportContent(etReportContent.getText().toString());
-                                reportWorker.execute();
+                                new ReportWorker(Products.this, etReportContent.getText().toString()).execute();
                             }
                         })
                         .setNegativeButton(getString(R.string.action_cancel), null)
@@ -349,143 +332,99 @@ public class Products extends AppCompatActivity
         return true;
     }
 
-    private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
+    private static class ProductsActivityNetworkWorker extends ActivityNetworkWorker {
         private WeakReference<Products> productsActivity;
 
-        NetworkWorker(Products productsActivity) {
+        ProductsActivityNetworkWorker(Products productsActivity) {
             this.productsActivity = new WeakReference<>(productsActivity);
+
+            setTargetActivity(productsActivity);
+
+            final Products reference = this.productsActivity.get();
+
+            if (reference != null) {
+                setRequest(reference.getString(R.string.request_getUserProducts));
+            }
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected void showInternalError(final String message, final Activity reference) {
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView icError = reference.findViewById(R.id.icError);
+                    TextView tvError = reference.findViewById(R.id.tvError);
+                    TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
+
+                    icError.setVisibility(View.VISIBLE);
+                    tvError.setVisibility(View.VISIBLE);
+                    tvErrorExtra.setText(message);
+                    tvErrorExtra.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+
+        @Override
+        protected void handleOutput(String serverOutput) {
             final Products reference = productsActivity.get();
 
             if (productsActivity == null) {
-                return null;
+                return;
             }
 
-            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
-            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
-
             try {
-                URL url = new URL(preURL);
-                HttpsURLConnection httpsURLConnection = null;
+                final JSONArray jsonArray = new JSONArray(serverOutput);
 
-                try {
-                    // Try to open a connection.
-                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
-                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
-
-                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
-                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
-                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
-
-                    Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getUserProducts));
-
-                    String query = builder.build().getEncodedQuery();
-
-                    // Write POST data.
-                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
-                    BufferedWriter bufferedWriter = new BufferedWriter(
-                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
-                    bufferedWriter.write(query);
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-
-                    // Retrieve the response.
-                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
-
-                    final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-
-                    if (jsonArray.length() > 0) {
-                        Log.d(TAG, "doInBackground: products: " + jsonArray.toString());
-                        reference.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                reference.productsAdapter.setNewData(jsonArray);
-
-                                ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
-                                ImageView icError = reference.findViewById(R.id.icError);
-                                TextView tvError = reference.findViewById(R.id.tvError);
-                                TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
-
-                                icNoProducts.setVisibility(View.GONE);
-                                tvNoProducts.setVisibility(View.GONE);
-                                icError.setVisibility(View.GONE);
-                                tvError.setVisibility(View.GONE);
-                                tvErrorExtra.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                    } else {
-                        reference.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
-                                TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
-                                RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
-                                ImageView icError = reference.findViewById(R.id.icError);
-                                TextView tvError = reference.findViewById(R.id.tvError);
-                                TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
-
-                                icNoProducts.setVisibility(View.VISIBLE);
-                                tvNoProducts.setVisibility(View.VISIBLE);
-                                icError.setVisibility(View.GONE);
-                                tvError.setVisibility(View.GONE);
-                                tvErrorExtra.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.GONE);
-                            }
-                        });
-                    }
-                } catch (final Exception e) {
+                if (jsonArray.length() > 0) {
+                    Log.d(TAG, "doInBackground: products: " + jsonArray.toString());
                     reference.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            reference.productsAdapter.setNewData(jsonArray);
+
+                            ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
+                            TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
+                            RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
                             ImageView icError = reference.findViewById(R.id.icError);
                             TextView tvError = reference.findViewById(R.id.tvError);
                             TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
 
-                            icError.setVisibility(View.VISIBLE);
-                            tvError.setVisibility(View.VISIBLE);
-                            tvErrorExtra.setText(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
-                            tvErrorExtra.setVisibility(View.VISIBLE);
+                            icNoProducts.setVisibility(View.GONE);
+                            tvNoProducts.setVisibility(View.GONE);
+                            icError.setVisibility(View.GONE);
+                            tvError.setVisibility(View.GONE);
+                            tvErrorExtra.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
                         }
                     });
-                    e.printStackTrace();
-                } finally {
-                    if (httpsURLConnection != null) {
-                        httpsURLConnection.disconnect();
-                    }
-                }
-            } catch (final MalformedURLException e) {
-                reference.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ImageView icError = reference.findViewById(R.id.icError);
-                        TextView tvError = reference.findViewById(R.id.tvError);
-                        TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
+                } else {
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ImageView icNoProducts = reference.findViewById(R.id.icNoProducts);
+                            TextView tvNoProducts = reference.findViewById(R.id.tvNoProducts);
+                            RecyclerView recyclerView = reference.findViewById(R.id.rvProducts);
+                            ImageView icError = reference.findViewById(R.id.icError);
+                            TextView tvError = reference.findViewById(R.id.tvError);
+                            TextView tvErrorExtra = reference.findViewById(R.id.tvErrorExtra);
 
-                        icError.setVisibility(View.VISIBLE);
-                        tvError.setVisibility(View.VISIBLE);
-                        tvErrorExtra.setText(reference.getString(R.string.products_error_malformed_url));
-                        tvErrorExtra.setVisibility(View.VISIBLE);
-                    }
-                });
+                            icNoProducts.setVisibility(View.VISIBLE);
+                            tvNoProducts.setVisibility(View.VISIBLE);
+                            icError.setVisibility(View.GONE);
+                            tvError.setVisibility(View.GONE);
+                            tvErrorExtra.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            } catch (final Exception e) {
+                showInternalError(
+                        String.format(reference.getString(R.string.products_error_server_failure),
+                                reference.getString(R.string.server_hostname)),
+                        reference);
+
                 e.printStackTrace();
             }
-            return null;
         }
 
         @Override
@@ -519,139 +458,82 @@ public class Products extends AppCompatActivity
         }
     }
 
-    private static class OrderRequestNetworkWorker extends AsyncTask<Void, Void, Void> {
+    private static class OrderRequestActivityNetworkWorker extends ActivityNetworkWorker {
         private static final String ORDER_PASS = "0";
         private static final String ORDER_ERROR = "1";
         private static final String ORDER_NOT_ALLOWED = "2";
         private static final String ORDER_ALREADY_ORDERED = "3";
         private WeakReference<Products> productsActivity;
-        private int productId = -1;
 
-        OrderRequestNetworkWorker(Products productsActivity) {
+        OrderRequestActivityNetworkWorker(Products productsActivity, int productId) {
             this.productsActivity = new WeakReference<>(productsActivity);
-        }
 
-        private String getEncodedProductId(String key, int productId) {
-            return SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + productId;
-        }
+            setTargetActivity(productsActivity);
 
-        public void setProductId(int id) {
-            productId = id;
+            Products reference = this.productsActivity.get();
+
+            if (reference != null) {
+                setRequest(reference.getString(R.string.request_makeOrder));
+                String key = reference.getString(R.string.server_content_param);
+
+                setEncodedData(SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + productId);
+            }
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected void handleOutput(String serverOutput) {
             final Products reference = productsActivity.get();
 
             if (productsActivity == null) {
-                return null;
+                return;
             }
 
-            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
-            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+            switch (serverOutput) {
+                case ORDER_PASS:
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(reference, reference.getString(R.string.order_success), Toast.LENGTH_LONG).show();
 
-            try {
-                URL url = new URL(preURL);
-                HttpsURLConnection httpsURLConnection = null;
+                            Intent intent = new Intent(reference, OrderStatusLooper.class);
+                            reference.stopService(intent);
+                            reference.startService(intent);
 
-                try {
-                    // Try to open a connection.
-                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
-                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
-
-                    // Set the cookies.
-                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
-                    Log.d(TAG, "doInBackground: cookie: " + cookie);
-                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
-
-                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
-                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
-                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
-
-                    Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_makeOrder));
-
-                    String query = builder.build().getEncodedQuery() + getEncodedProductId(reference.getString(R.string.server_content_param), productId);
-                    Log.d(TAG, "doInBackground: query: " + query);
-
-                    // Write POST data.
-                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
-                    BufferedWriter bufferedWriter = new BufferedWriter(
-                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
-                    bufferedWriter.write(query);
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-
-                    // Retrieve the response.
-                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
-
-                    switch (stringBuilder.toString()) {
-                        case ORDER_PASS:
-                            reference.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(reference, reference.getString(R.string.order_success), Toast.LENGTH_LONG).show();
-
-                                    Intent intent = new Intent(reference, OrderStatusLooper.class);
-                                    reference.stopService(intent);
-                                    reference.startService(intent);
-
-                                    Intent orderStatusDisplay = new Intent(reference, Requests.class);
-                                    reference.startActivity(orderStatusDisplay);
-                                    reference.finish();
-                                }
-                            });
-                            break;
-                        case ORDER_ALREADY_ORDERED:
-                            reference.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(reference, reference.getString(R.string.order_already_ordered), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                            break;
-                        case ORDER_ERROR:
-                            reference.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(reference, reference.getString(R.string.products_error), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                            break;
-                        case ORDER_NOT_ALLOWED:
-                            reference.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(reference, reference.getString(R.string.not_allowed_error), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                            break;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (httpsURLConnection != null) {
-                        httpsURLConnection.disconnect();
-                    }
-                }
-            } catch (final MalformedURLException e) {
-                e.printStackTrace();
+                            Intent orderStatusDisplay = new Intent(reference, Requests.class);
+                            reference.startActivity(orderStatusDisplay);
+                            reference.finish();
+                        }
+                    });
+                    break;
+                case ORDER_ALREADY_ORDERED:
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(reference, reference.getString(R.string.order_already_ordered), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    break;
+                case ORDER_ERROR:
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(reference, reference.getString(R.string.products_error), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    break;
+                case ORDER_NOT_ALLOWED:
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(reference, reference.getString(R.string.not_allowed_error), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    break;
             }
-            return null;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void showInternalError(String message, Activity reference) {
         }
     }
 }

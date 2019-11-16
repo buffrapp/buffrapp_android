@@ -165,9 +165,7 @@ public class About extends AppCompatActivity
                         .setPositiveButton(getString(R.string.action_send), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ReportWorker reportWorker = new ReportWorker(About.this);
-                                reportWorker.setReportContent(etReportContent.getText().toString());
-                                reportWorker.execute();
+                                new ReportWorker(About.this, etReportContent.getText().toString()).execute();
                             }
                         })
                         .setNegativeButton(getString(R.string.action_cancel), null)

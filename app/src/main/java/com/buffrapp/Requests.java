@@ -1,13 +1,11 @@
 package com.buffrapp;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.net.SSLCertificateSocketFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -44,30 +42,18 @@ import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.shape.Circle;
 import com.takusemba.spotlight.target.SimpleTarget;
 
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import nl.dionsegijn.konfetti.KonfettiView;
 import nl.dionsegijn.konfetti.models.Shape;
 import nl.dionsegijn.konfetti.models.Size;
+import util.ActivityNetworkWorker;
 
 public class Requests extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -82,7 +68,7 @@ public class Requests extends AppCompatActivity
     private boolean isCancelling;
 
     private static Timer timer;
-    private static NetworkWorker networkWorker;
+    private static OrderStatusNetworkWorker orderStatusNetworkWorker;
 
     private EditText etReportContent;
     private AlertDialog dialog;
@@ -167,7 +153,7 @@ public class Requests extends AppCompatActivity
 
         shouldHoldDeliveryView = false;
 
-        networkWorker = new NetworkWorker(Requests.this);
+        orderStatusNetworkWorker = new OrderStatusNetworkWorker(Requests.this);
 
         swipeRefreshLayout.setRefreshing(true);
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
@@ -200,12 +186,12 @@ public class Requests extends AppCompatActivity
                         emptyImageView.setVisibility(View.GONE);
                         emptyTextView.setVisibility(View.GONE);
 
-                        networkWorker = new NetworkWorker(Requests.this);
-                        networkWorker.execute();
+                        orderStatusNetworkWorker = new OrderStatusNetworkWorker(Requests.this);
+                        orderStatusNetworkWorker.execute();
                     }
                 });
 
-        new NetworkWorker(Requests.this).execute();
+        new OrderStatusNetworkWorker(Requests.this).execute();
 
         timer = new Timer();
         TimerTask updatingTask = new TimerTask() {
@@ -214,7 +200,7 @@ public class Requests extends AppCompatActivity
                     @Override
                     public void run() {
                         if (shouldTryToUpdate) {
-                            new NetworkWorker(Requests.this).execute();
+                            new OrderStatusNetworkWorker(Requests.this).execute();
                         } else {
                             timer.cancel();
                             timer.purge();
@@ -284,7 +270,7 @@ public class Requests extends AppCompatActivity
         timer.cancel();
         timer.purge();
 
-        networkWorker.cancel(true);
+        orderStatusNetworkWorker.cancel(true);
 
         if (shouldRunBackgroundWorkerOnStop) {
             Intent intent = new Intent(this, OrderStatusLooper.class);
@@ -363,9 +349,7 @@ public class Requests extends AppCompatActivity
                         .setPositiveButton(getString(R.string.action_send), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ReportWorker reportWorker = new ReportWorker(Requests.this);
-                                reportWorker.setReportContent(etReportContent.getText().toString());
-                                reportWorker.execute();
+                                new ReportWorker(Requests.this, etReportContent.getText().toString()).execute();
                             }
                         })
                         .setNegativeButton(getString(R.string.action_cancel), null)
@@ -397,56 +381,22 @@ public class Requests extends AppCompatActivity
         return true;
     }
 
-    private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
+    private static class OrderStatusNetworkWorker extends ActivityNetworkWorker {
         private static final String ORDER_ERROR = "1";
         private static final String ORDERS_NOT_ALLOWED = "2";
         private static final String ORDERS_NO_ORDERS = "3";
         private WeakReference<Requests> requestsActivity;
 
-        NetworkWorker(Requests requestsActivity) {
+        OrderStatusNetworkWorker(Requests requestsActivity) {
             this.requestsActivity = new WeakReference<>(requestsActivity);
-        }
 
-        private void showInternalError(final String message) {
-            Log.d(TAG, "doInBackground: an internal error has occurred.");
-            final Requests reference = requestsActivity.get();
+            setTargetActivity(requestsActivity);
 
-            if (requestsActivity == null) {
-                Log.d(TAG, "doInBackground: showInternalError: failed to get a reference.");
-                return;
+            Requests reference = this.requestsActivity.get();
+
+            if (reference != null) {
+                setRequest(reference.getString(R.string.request_getUserOrders));
             }
-
-            reference.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ImageView requestsImageView = reference.findViewById(R.id.ic_requests);
-                    TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
-                    TextView statusTextView = reference.findViewById(R.id.requests_order_status);
-                    ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
-                    MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
-
-                    ImageView errorImageView = reference.findViewById(R.id.ic_error);
-                    TextView errorTextView = reference.findViewById(R.id.tv_error);
-                    TextView errorExtraTextView = reference.findViewById(R.id.tv_error_extra);
-
-                    ImageView emptyImageView = reference.findViewById(R.id.ic_empty);
-                    TextView emptyTextView = reference.findViewById(R.id.tv_empty);
-
-                    requestsImageView.setVisibility(View.GONE);
-                    productNameTextView.setVisibility(View.GONE);
-                    statusTextView.setVisibility(View.GONE);
-                    progressBar.setVisibility(View.GONE);
-                    cancelButtonLayout.setVisibility(View.GONE);
-
-                    errorImageView.setVisibility(View.VISIBLE);
-                    errorTextView.setVisibility(View.VISIBLE);
-                    errorExtraTextView.setText(message);
-                    errorExtraTextView.setVisibility(View.VISIBLE);
-
-                    emptyImageView.setVisibility(View.GONE);
-                    emptyTextView.setVisibility(View.GONE);
-                }
-            });
         }
 
         private void showNoOrders() {
@@ -597,221 +547,202 @@ public class Requests extends AppCompatActivity
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected void handleOutput(String serverOutput) {
+            Log.d(TAG, "doInBackground: an order has been found.");
             final Requests reference = requestsActivity.get();
 
             if (requestsActivity == null) {
-                Log.d(TAG, "doInBackground: failed to get a reference.");
-                return null;
+                Log.d(TAG, "doInBackground: showNoOrders: failed to get a reference.");
+                return;
             }
 
-            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
-            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
+            switch (serverOutput) {
+                case ORDER_ERROR:
+                    showInternalError(reference.getString(R.string.internal_error), reference);
+                    break;
+                case ORDERS_NOT_ALLOWED:
+                    showInternalError(reference.getString(R.string.not_allowed_error), reference);
+                    break;
+                case ORDERS_NO_ORDERS:
+                    showNoOrders();
+                    break;
+                default:
+                    try {
+                        final JSONArray jsonArray = new JSONArray(serverOutput);
 
-            try {
-                URL url = new URL(preURL);
-                HttpsURLConnection httpsURLConnection = null;
+                        if (jsonArray.length() > 0) {
+                            Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
 
-                try {
-                    // Try to open a connection.
-                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
-                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
+                            final JSONObject order = jsonArray.getJSONObject(0);
 
-                    // Set the cookies.
-                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
-                    Log.d(TAG, "doInBackground: cookie: " + cookie);
-                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
+                            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(reference);
+                            int last_id = sharedPreferences.getInt(reference.getString(R.string.key_last_order), reference.getResources().getInteger(R.integer.order_id_default));
+                            Log.d(TAG, "doInBackground: last_id: " + last_id);
 
-                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
-                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
-                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
+                            if (last_id == order.getInt("ID_Pedido") && !reference.shouldHoldDeliveryView) {
+                                Log.d(TAG, "doInBackground: last_id matches remote, showing no orders layout.");
+                                showNoOrders();
+                            } else {
+                                Log.d(TAG, "doInBackground: last_id doesn\'t match remote, populating layout...");
 
-                    Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_getUserOrders));
+                                reference.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        String productName = null;
 
-                    String query = builder.build().getEncodedQuery();
-                    Log.d(TAG, "doInBackground: query: " + query);
+                                        try {
+                                            productName = order.getString("Nombre_Producto");
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
 
-                    // Write POST data.
-                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
-                    BufferedWriter bufferedWriter = new BufferedWriter(
-                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
-                    bufferedWriter.write(query);
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
+                                        if (productName != null) {
+                                            TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
+                                            productNameTextView.setText(productName);
+                                        }
+                                    }
+                                });
 
-                    // Retrieve the response.
-                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
+                                final TextView productStatusTextView = reference.findViewById(R.id.requests_order_status);
 
-                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
+                                // On most cases it should be gone, so this will be the default behavior.
+                                boolean isCancellable = false;
+                                final MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
 
-                    switch (stringBuilder.toString()) {
-                        case ORDER_ERROR:
-                            showInternalError(reference.getString(R.string.internal_error));
-                            break;
-                        case ORDERS_NOT_ALLOWED:
-                            showInternalError(reference.getString(R.string.not_allowed_error));
-                            break;
-                        case ORDERS_NO_ORDERS:
-                            showNoOrders();
-                            break;
-                        default:
-                            final JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                                reference.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        cancelButtonLayout.setVisibility(View.GONE);
+                                    }
+                                });
 
-                            if (jsonArray.length() > 0) {
-                                Log.d(TAG, "doInBackground: jsonArray: " + jsonArray.toString());
+                                if (!order.isNull("DNI_Cancelado")) {
+                                    Log.d(TAG, "doInBackground: the order has been cancelled.");
+                                    setProgressBarStatus(0, R.color.colorRed);
+                                    reference.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            productStatusTextView.setText(reference.getString(R.string.requests_order_cancelled));
 
-                                final JSONObject order = jsonArray.getJSONObject(0);
+                                            updateLastOrderId(order);
+                                        }
+                                    });
+                                } else if (order.isNull("FH_Tomado")) {
+                                    setProgressBarStatus(25, R.color.colorRed);
+                                    reference.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            productStatusTextView.setText(reference.getString(R.string.requests_order_received));
+                                        }
+                                    });
 
-                                final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(reference);
-                                int last_id = sharedPreferences.getInt(reference.getString(R.string.key_last_order), reference.getResources().getInteger(R.integer.order_id_default));
-                                Log.d(TAG, "doInBackground: last_id: " + last_id);
-
-                                if (last_id == order.getInt("ID_Pedido") && !reference.shouldHoldDeliveryView) {
-                                    Log.d(TAG, "doInBackground: last_id matches remote, showing no orders layout.");
-                                    showNoOrders();
+                                    isCancellable = true;
+                                } else if (order.isNull("FH_Listo")) {
+                                    setProgressBarStatus(50, R.color.colorOngoing);
+                                    reference.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            productStatusTextView.setText(reference.getString(R.string.requests_order_taken));
+                                        }
+                                    });
+                                } else if (order.isNull("FH_Entregado")) {
+                                    setProgressBarStatus(75, R.color.colorAccent);
+                                    reference.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            productStatusTextView.setText(reference.getString(R.string.requests_order_ready));
+                                        }
+                                    });
                                 } else {
-                                    Log.d(TAG, "doInBackground: last_id doesn\'t match remote, populating layout...");
-
+                                    setProgressBarStatus(100, R.color.colorAccentDark);
                                     reference.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            String productName = null;
+                                            if (reference.firstDelivery) {
+                                                productStatusTextView.setText(reference.getString(R.string.requests_order_delivered_first));
 
-                                            try {
-                                                productName = order.getString("Nombre_Producto");
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
+                                                if (reference.shouldDisplayConfetti) {
+                                                    final KonfettiView konfettiView = reference.findViewById(R.id.confetti_view);
+                                                    konfettiView.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            konfettiView.build()
+                                                                    .addColors(Color.YELLOW, Color.GREEN, Color.RED, Color.BLUE, Color.MAGENTA)
+                                                                    .setDirection(0, 360)
+                                                                    .setSpeed(3f, 6f)
+                                                                    .setFadeOutEnabled(true)
+                                                                    .setTimeToLive(2000L)
+                                                                    .addShapes(Shape.RECT, Shape.CIRCLE)
+                                                                    .addSizes(new Size(12, 6f), new Size(16, 3f))
+                                                                    .setPosition(-50f, (float) konfettiView.getWidth() + 50f, 0, konfettiView.getHeight() + 50f)
+                                                                    .burst(250);
+                                                        }
+                                                    });
 
-                                            if (productName != null) {
-                                                TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
-                                                productNameTextView.setText(productName);
-                                            }
-                                        }
-                                    });
-
-                                    final TextView productStatusTextView = reference.findViewById(R.id.requests_order_status);
-
-                                    // On most cases it should be gone, so this will be the default behavior.
-                                    boolean isCancellable = false;
-                                    final MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
-
-                                    reference.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            cancelButtonLayout.setVisibility(View.GONE);
-                                        }
-                                    });
-
-                                    if (!order.isNull("DNI_Cancelado")) {
-                                        Log.d(TAG, "doInBackground: the order has been cancelled.");
-                                        setProgressBarStatus(0, R.color.colorRed);
-                                        reference.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                productStatusTextView.setText(reference.getString(R.string.requests_order_cancelled));
-
-                                                updateLastOrderId(order);
-                                            }
-                                        });
-                                    } else if (order.isNull("FH_Tomado")) {
-                                        setProgressBarStatus(25, R.color.colorRed);
-                                        reference.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                productStatusTextView.setText(reference.getString(R.string.requests_order_received));
-                                            }
-                                        });
-
-                                        isCancellable = true;
-                                    } else if (order.isNull("FH_Listo")) {
-                                        setProgressBarStatus(50, R.color.colorOngoing);
-                                        reference.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                productStatusTextView.setText(reference.getString(R.string.requests_order_taken));
-                                            }
-                                        });
-                                    } else if (order.isNull("FH_Entregado")) {
-                                        setProgressBarStatus(75, R.color.colorAccent);
-                                        reference.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                productStatusTextView.setText(reference.getString(R.string.requests_order_ready));
-                                            }
-                                        });
-                                    } else {
-                                        setProgressBarStatus(100, R.color.colorAccentDark);
-                                        reference.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                if (reference.firstDelivery) {
-                                                    productStatusTextView.setText(reference.getString(R.string.requests_order_delivered_first));
-
-                                                    if (reference.shouldDisplayConfetti) {
-                                                        final KonfettiView konfettiView = reference.findViewById(R.id.confetti_view);
-                                                        konfettiView.post(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-                                                                konfettiView.build()
-                                                                        .addColors(Color.YELLOW, Color.GREEN, Color.RED, Color.BLUE, Color.MAGENTA)
-                                                                        .setDirection(0, 360)
-                                                                        .setSpeed(3f, 6f)
-                                                                        .setFadeOutEnabled(true)
-                                                                        .setTimeToLive(2000L)
-                                                                        .addShapes(Shape.RECT, Shape.CIRCLE)
-                                                                        .addSizes(new Size(12, 6f), new Size(16, 3f))
-                                                                        .setPosition(-50f, (float) konfettiView.getWidth() + 50f, 0, konfettiView.getHeight() + 50f)
-                                                                        .burst(250);
-                                                            }
-                                                        });
-
-                                                        reference.shouldDisplayConfetti = false;
-                                                    }
-
-                                                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                    editor.putBoolean(reference.getString(R.string.key_first_delivery), false);
-                                                    editor.apply();
-                                                } else {
-                                                    productStatusTextView.setText(reference.getString(R.string.requests_order_delivered));
+                                                    reference.shouldDisplayConfetti = false;
                                                 }
 
-                                                updateLastOrderId(order);
+                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                editor.putBoolean(reference.getString(R.string.key_first_delivery), false);
+                                                editor.apply();
+                                            } else {
+                                                productStatusTextView.setText(reference.getString(R.string.requests_order_delivered));
                                             }
-                                        });
-                                    }
 
-                                    reference.shouldRunBackgroundWorkerOnStop = true;
-                                    showDataFields(isCancellable);
+                                            updateLastOrderId(order);
+                                        }
+                                    });
                                 }
-                            } else {
-                                showInternalError(reference.getString(R.string.internal_error));
+
+                                reference.shouldRunBackgroundWorkerOnStop = true;
+                                showDataFields(isCancellable);
                             }
-
+                        } else {
+                            showInternalError(reference.getString(R.string.internal_error), reference);
+                        }
+                    } catch (JSONException jsonException) {
+                        jsonException.printStackTrace();
+                        showInternalError(reference.getString(R.string.internal_error), reference);
                     }
 
-                    Log.d(TAG, "doInBackground: stringBuilder: " + stringBuilder.toString());
-                } catch (Exception e) {
-                    showInternalError(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
-                    e.printStackTrace();
-                } finally {
-                    if (httpsURLConnection != null) {
-                        httpsURLConnection.disconnect();
-                    }
-                }
-            } catch (final MalformedURLException e) {
-                showInternalError(reference.getString(R.string.products_error_malformed_url));
-                e.printStackTrace();
             }
-            return null;
+        }
+
+        @Override
+        protected void showInternalError(final String message, final Activity reference) {
+            Log.d(TAG, "doInBackground: an internal error has occurred.");
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView requestsImageView = reference.findViewById(R.id.ic_requests);
+                    TextView productNameTextView = reference.findViewById(R.id.requests_order_product_name);
+                    TextView statusTextView = reference.findViewById(R.id.requests_order_status);
+                    ProgressBar progressBar = reference.findViewById(R.id.requests_order_progress);
+                    MaterialRippleLayout cancelButtonLayout = reference.findViewById(R.id.requests_order_cancel);
+
+                    ImageView errorImageView = reference.findViewById(R.id.ic_error);
+                    TextView errorTextView = reference.findViewById(R.id.tv_error);
+                    TextView errorExtraTextView = reference.findViewById(R.id.tv_error_extra);
+
+                    ImageView emptyImageView = reference.findViewById(R.id.ic_empty);
+                    TextView emptyTextView = reference.findViewById(R.id.tv_empty);
+
+                    requestsImageView.setVisibility(View.GONE);
+                    productNameTextView.setVisibility(View.GONE);
+                    statusTextView.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+                    cancelButtonLayout.setVisibility(View.GONE);
+
+                    errorImageView.setVisibility(View.VISIBLE);
+                    errorTextView.setVisibility(View.VISIBLE);
+                    errorExtraTextView.setText(message);
+                    errorExtraTextView.setVisibility(View.VISIBLE);
+
+                    emptyImageView.setVisibility(View.GONE);
+                    emptyTextView.setVisibility(View.GONE);
+                }
+            });
         }
 
         @Override
@@ -827,7 +758,7 @@ public class Requests extends AppCompatActivity
         }
     }
 
-    private static class OrderCancelNetworkWorker extends AsyncTask<Void, Void, Void> {
+    private static class OrderCancelNetworkWorker extends ActivityNetworkWorker {
         private static final String CANCEL_PASS = "0";
         private static final String CANCEL_ERROR = "1";
         private static final String CANCEL_NOT_ALLOWED = "2";
@@ -835,24 +766,16 @@ public class Requests extends AppCompatActivity
 
         OrderCancelNetworkWorker(Requests requestsActivity) {
             this.requestsActivity = new WeakReference<>(requestsActivity);
-        }
 
-        private void showInternalError(final String message) {
-            Log.d(TAG, "doInBackground: an internal error has occurred.");
-            final Requests reference = requestsActivity.get();
+            setTargetActivity(requestsActivity);
 
-            if (requestsActivity == null) {
-                Log.d(TAG, "doInBackground: showInternalError: failed to get a reference.");
-                return;
+            Requests reference = this.requestsActivity.get();
+
+            if (reference != null) {
+                setRequest(reference.getString(R.string.request_cancelOrder));
             }
-
-            reference.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(reference, message, Toast.LENGTH_LONG).show();
-                }
-            });
         }
+
 
         private void showNoOrders() {
             Log.d(TAG, "doInBackground: no ongoing orders found.");
@@ -896,110 +819,57 @@ public class Requests extends AppCompatActivity
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected void handleOutput(String serverOutput) {
             final Requests reference = requestsActivity.get();
 
-            if (requestsActivity == null) {
-                Log.d(TAG, "doInBackground: failed to get a reference.");
-                return null;
-            }
-
-            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
-            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
-
-            try {
-                URL url = new URL(preURL);
-                HttpsURLConnection httpsURLConnection = null;
-
-                try {
-                    // Try to open a connection.
-                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
-                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
-
-                    // Set the cookies.
-                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
-                    Log.d(TAG, "doInBackground: cookie: " + cookie);
-                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
-
-                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
-                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
-                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
-
-                    Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_cancelOrder));
-
-                    String query = builder.build().getEncodedQuery();
-                    Log.d(TAG, "doInBackground: query: " + query);
-
-                    // Write POST data.
-                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
-                    BufferedWriter bufferedWriter = new BufferedWriter(
-                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
-                    bufferedWriter.write(query);
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-
-                    // Retrieve the response.
-                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
-
-                    switch (stringBuilder.toString()) {
-                        case CANCEL_ERROR:
-                            showInternalError(reference.getString(R.string.requests_order_cancel_failed));
-                            break;
-                        case CANCEL_NOT_ALLOWED:
-                            showInternalError(reference.getString(R.string.not_allowed_error));
-                            break;
-                        case CANCEL_PASS:
-                            showNoOrders();
-                            reference.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(reference, reference.getString(R.string.requests_order_cancel_success), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                    }
-
-                    if (reference.isCancelling) {
+            if (reference != null) {
+                switch (serverOutput) {
+                    case CANCEL_ERROR:
+                        showInternalError(reference.getString(R.string.requests_order_cancel_failed), reference);
+                        break;
+                    case CANCEL_NOT_ALLOWED:
+                        showInternalError(reference.getString(R.string.not_allowed_error), reference);
+                        break;
+                    case CANCEL_PASS:
+                        showNoOrders();
                         reference.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                reference.cancelButtonLayout.setVisibility(View.GONE);
-                                reference.progressBarCancel.setVisibility(View.VISIBLE);
+                                Toast.makeText(reference, reference.getString(R.string.requests_order_cancel_success), Toast.LENGTH_LONG).show();
                             }
                         });
-                    } else {
-                        reference.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                reference.cancelButtonLayout.setVisibility(View.VISIBLE);
-                                reference.progressBarCancel.setVisibility(View.GONE);
-                            }
-                        });
-                    }
-
-                    Log.d(TAG, "doInBackground: stringBuilder: " + stringBuilder.toString());
-                } catch (Exception e) {
-                    showInternalError(String.format(reference.getString(R.string.products_error_server_failure), reference.getString(R.string.server_hostname)));
-                    e.printStackTrace();
-                } finally {
-                    if (httpsURLConnection != null) {
-                        httpsURLConnection.disconnect();
-                    }
                 }
-            } catch (final MalformedURLException e) {
-                showInternalError(reference.getString(R.string.products_error_malformed_url));
-                e.printStackTrace();
+
+                if (reference.isCancelling) {
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            reference.cancelButtonLayout.setVisibility(View.GONE);
+                            reference.progressBarCancel.setVisibility(View.VISIBLE);
+                        }
+                    });
+                } else {
+                    reference.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            reference.cancelButtonLayout.setVisibility(View.VISIBLE);
+                            reference.progressBarCancel.setVisibility(View.GONE);
+                        }
+                    });
+                }
             }
-            return null;
+        }
+
+        @Override
+        protected void showInternalError(final String message, final Activity reference) {
+            Log.d(TAG, "doInBackground: an internal error has occurred.");
+
+            reference.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(reference, message, Toast.LENGTH_LONG).show();
+                }
+            });
         }
 
         @Override

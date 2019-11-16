@@ -6,12 +6,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.net.SSLCertificateSocketFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,27 +16,15 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.pm.PackageInfoCompat;
 
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
+import util.ServiceNetworkWorker;
 
 public class UpdatesChecker extends Service {
 
     private static final String TAG = "UpdatesChecker";
 
-    private NetworkWorker networkWorker;
+    private UpdatesNetworkWorker updatesNetworkWorker;
 
     private Activity parentActivity;
 
@@ -55,13 +40,13 @@ public class UpdatesChecker extends Service {
     public void onCreate() {
         super.onCreate();
 
-        networkWorker = new NetworkWorker(this, parentActivity);
-        networkWorker.execute();
+        updatesNetworkWorker = new UpdatesNetworkWorker(this, parentActivity);
+        updatesNetworkWorker.execute();
     }
 
     @Override
     public void onDestroy() {
-        networkWorker.cancel(true);
+        updatesNetworkWorker.cancel(true);
 
         super.onDestroy();
     }
@@ -110,7 +95,7 @@ public class UpdatesChecker extends Service {
         notificationManager.notify(getResources().getInteger(R.integer.updates_notification_id), notificationBuilder.build());
     }
 
-    private static class NetworkWorker extends AsyncTask<Void, Void, Void> {
+    private static class UpdatesNetworkWorker extends ServiceNetworkWorker {
         private static final String UPDATE_PASS = "0"; // but no update found.
         private static final String UPDATE_ERROR = "1";
         private static final String UPDATE_FOUND = "2";
@@ -123,127 +108,84 @@ public class UpdatesChecker extends Service {
         private WeakReference<UpdatesChecker> updateCheckerSvc;
         private WeakReference<Activity> parentActivity;
 
-        NetworkWorker(UpdatesChecker updateCheckerSvc, Activity parentActivity) {
+        UpdatesNetworkWorker(UpdatesChecker updateCheckerSvc, Activity parentActivity) {
             this.updateCheckerSvc = new WeakReference<>(updateCheckerSvc);
             this.parentActivity = new WeakReference<>(parentActivity);
-        }
 
-        private String getEncodedProfileData(String key, long currentVersionCode) {
-            return SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + currentVersionCode;
+            setTargetService(updateCheckerSvc);
+
+            UpdatesChecker reference = this.updateCheckerSvc.get();
+
+            if (reference != null) {
+                setRequest(reference.getString(R.string.request_checkForUpdates));
+                String key = reference.getString(R.string.server_content_param);
+
+                try {
+                    setEncodedData(SYMBOL_AMPERSAND + key + SYMBOL_BRACKET_OPEN + 0 + SYMBOL_BRACKET_CLOSED + SYMBOL_EQUALS + PackageInfoCompat.getLongVersionCode(reference.getPackageManager().getPackageInfo(reference.getPackageName(), 0)));
+                } catch (PackageManager.NameNotFoundException nameNotFoundException) {
+                    nameNotFoundException.printStackTrace();
+                }
+            }
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        public void handleOutput(String serverOutput) {
             final Activity parentActivityReference = parentActivity.get();
 
             final UpdatesChecker reference = updateCheckerSvc.get();
 
             if (updateCheckerSvc == null) {
                 Log.d(TAG, "doInBackground: failed to get a reference.");
-                return null;
+                return;
             }
 
-            String preURL = reference.getString(R.string.server_proto) + reference.getString(R.string.server_hostname) + reference.getString(R.string.server_path);
-            Log.d(TAG, "populateView: generated URL from resources: \"" + preURL + "\"");
-
-            try {
-                URL url = new URL(preURL);
-                HttpsURLConnection httpsURLConnection = null;
-
-                try {
-                    // Try to open a connection.
-                    httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                    httpsURLConnection.setConnectTimeout(reference.getResources().getInteger(R.integer.connection_timeout));
-                    httpsURLConnection.setRequestMethod(reference.getString(R.string.server_request_method));
-
-                    // Set the cookies.
-                    String cookie = PreferenceManager.getDefaultSharedPreferences(reference).getString(reference.getString(R.string.key_session_id), null);
-                    Log.d(TAG, "doInBackground: cookie: " + cookie);
-                    httpsURLConnection.setRequestProperty(reference.getString(R.string.server_cookie_request_key), cookie);
-
-                    // TODO: DEBUGGING!!! REMOVE THIS FOR PRODUCTION.
-                    httpsURLConnection.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
-                    httpsURLConnection.setHostnameVerifier(new AllowAllHostnameVerifier());
-
-                    Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter(reference.getString(R.string.server_request_param), reference.getString(R.string.request_checkForUpdates));
-
-                    String query = builder.build().getEncodedQuery() + getEncodedProfileData(reference.getString(R.string.server_content_param), PackageInfoCompat.getLongVersionCode(reference.getPackageManager().getPackageInfo(reference.getPackageName(), 0)));
-                    Log.d(TAG, "doInBackground: query: " + query);
-
-                    // Write POST data.
-                    OutputStream outputStream = new BufferedOutputStream(httpsURLConnection.getOutputStream());
-                    BufferedWriter bufferedWriter = new BufferedWriter(
-                            new OutputStreamWriter(outputStream, reference.getString(R.string.server_encoding)));
-                    bufferedWriter.write(query);
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-
-                    // Retrieve the response.
-                    InputStream inputStream = new BufferedInputStream(httpsURLConnection.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
+            switch (serverOutput) {
+                case UPDATE_ERROR:
+                    if (parentActivityReference != null) {
+                        parentActivityReference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_error), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                    break;
+                case UPDATE_PASS:
+                    if (parentActivityReference != null) {
+                        parentActivityReference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_none), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                    break;
+                case UPDATE_FOUND:
+                    if (parentActivityReference != null) {
+                        parentActivityReference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_found), Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
 
-                    Log.d(TAG, "populateView: done fetching data, the result is: \"" + stringBuilder.toString() + "\"");
-
-                    switch (stringBuilder.toString()) {
-                        case UPDATE_ERROR:
-                            if (parentActivityReference != null) {
-                                parentActivityReference.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_error), Toast.LENGTH_LONG).show();
-                                    }
-                                });
+                    reference.sendPushNotification(reference.getString(R.string.updates_found));
+                    break;
+                default:
+                    if (parentActivityReference != null) {
+                        parentActivityReference.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_error), Toast.LENGTH_LONG).show();
                             }
-                            break;
-                        case UPDATE_PASS:
-                            if (parentActivityReference != null) {
-                                parentActivityReference.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_none), Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }
-                            break;
-                        case UPDATE_FOUND:
-                            if (parentActivityReference != null) {
-                                parentActivityReference.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_found), Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }
-
-                            reference.sendPushNotification(reference.getString(R.string.updates_found));
-                            break;
-                        default:
-                            if (parentActivityReference != null) {
-                                parentActivityReference.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(parentActivityReference, parentActivityReference.getString(R.string.updates_error), Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }
+                        });
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (httpsURLConnection != null) {
-                        httpsURLConnection.disconnect();
-                    }
-                }
-            } catch (final MalformedURLException e) {
-                e.printStackTrace();
             }
-            return null;
+        }
+
+        @Override
+        public void showInternalError(String message, Service reference) {
         }
     }
 }
