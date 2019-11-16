@@ -4,6 +4,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -136,6 +137,15 @@ public class OrderStatusLooper extends Service {
         Log.d(TAG, "doInBackground: removing push notification with ID " + id + "...");
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.cancel(id);
+    }
+
+    protected static void removePushNotification(Context context) {
+        final int id = context.getResources().getInteger(R.integer.orders_notification_id);
+
+        Log.d(TAG, "doInBackground: removing push notification with ID " + id + "...");
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.cancel(id);
     }
 

@@ -65,7 +65,13 @@ public class DrawerHandler implements DrawerLayout.DrawerListener {
                 editor.remove(activity.getString(R.string.key_session_id));
                 editor.apply();
 
+                Intent orderStatusLooperIntent = new Intent(activity, OrderStatusLooper.class);
+                activity.stopService(orderStatusLooperIntent);
+
+                OrderStatusLooper.removePushNotification(activity);
+
                 Intent intent = new Intent(activity, LoginActivity.class);
+
                 activity.startActivity(intent);
             } else if (navCurrentId == R.id.nav_about) {
                 Intent intent = new Intent(activity, About.class);
