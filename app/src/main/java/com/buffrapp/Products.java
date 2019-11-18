@@ -1,11 +1,9 @@
 package com.buffrapp;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -51,8 +49,6 @@ public class Products extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ProductsAdapter.ItemClickListener {
 
     private static final String TAG = "Products";
-
-    private static final int READ_PERMISSION_ID = 16384;
 
     private static final Character SYMBOL_AMPERSAND = '&';
     private static final Character SYMBOL_EQUALS = '=';
@@ -159,19 +155,6 @@ public class Products extends AppCompatActivity
         }
 
         drawer.addDrawerListener(drawerHandler);
-
-        Bundle bundle = getIntent().getExtras();
-
-        if (bundle != null
-                &&
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                &&
-                bundle.getBoolean(getString(R.string.key_needs_storage_permission), false)) {
-
-            Log.d(TAG, "onCreate: requesting permissions...");
-
-            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_PERMISSION_ID);
-        }
     }
 
     private void showRvTapTarget() {
